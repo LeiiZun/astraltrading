@@ -1,12 +1,57 @@
+/* Style global */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  
-  .glow {
-    text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
-  }
-  
-  .plan-card {
-    @apply bg-gray-800 p-6 rounded-xl shadow-xl text-center hover:scale-105 transform transition-all duration-300;
-  }
-  
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1a1a1a;
+    color: white;
+}
+
+header {
+    padding: 20px 0;
+    background-color: #111;
+}
+
+header nav a {
+    margin: 0 15px;
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+header nav a:hover {
+    color: #fff;
+}
+
+.hero {
+    padding: 60px 0;
+    text-align: center;
+    background-color: #111;
+}
+
+.hero h2 {
+    font-size: 36px;
+}
+
+.btn-primary {
+    background-color: #3b82f6;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.btn-primary:hover {
+    background-color: #2563eb;
+}
+
+.performance, .cta {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #111;
+}

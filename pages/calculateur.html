@@ -1,31 +1,757 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Calculateur de position | Astral Trading</title>
-  <link rel="stylesheet" href="../css/style.css" />
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AstralTrading - Calculateur de Lot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --dark: #0f0f0f;
+            --darker: #080808;
+            --light: #f8fafc;
+            --gray: #1e1e1e;
+            --profit: #10b981;
+            --loss: #ef4444;
+            --propfirm: #8b5cf6;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--darker);
+            color: var(--light);
+            min-height: 100vh;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--darker) 0%, var(--gray) 100%);
+        }
+        
+        .card-glass {
+            background: rgba(15, 15, 15, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .input-field {
+            transition: all 0.3s ease;
+            background: rgba(30, 30, 30, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .input-field:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .tab-active {
+            background: rgba(59, 130, 246, 0.2);
+            border-bottom: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .tab-inactive {
+            border-bottom: 2px solid transparent;
+            color: var(--light);
+        }
+        
+        .tab-inactive:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Custom range slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .slide-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUp 0.8s ease-out forwards;
+        }
+        
+        @keyframes slideUp {
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+    </style>
 </head>
-<body class="bg-black text-white p-6">
-  <h1 class="text-3xl font-bold mb-4">Calculateur de taille de lot</h1>
+<body class="gradient-bg">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-xl font-bold text-white">Astral<span class="text-primary"> Trading</span></span>
+                    </div>
+                    <div class="hidden md:block ml-10">
+                        <div class="flex space-x-8">
+                            <a href="C:\Users\deadp\Desktop\AstralTrading\index.html" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Retour à l'accueil</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-center space-x-4">
+                        <div class="relative">
+                            <button class="p-1 rounded-full text-gray-400 hover:text-white focus:outline-none">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <button id="user-menu-button" class="flex items-center space-x-2 focus:outline-none">
+                                <img class="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                                <span class="text-gray-300 text-sm">John Doe</span>
+                                <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-  <form class="space-y-4">
-    <div>
-      <label class="block text-sm">Capital (€)</label>
-      <input type="number" class="w-full bg-gray-700 p-2 rounded" />
-    </div>
-    <div>
-      <label class="block text-sm">Risque (%)</label>
-      <input type="number" class="w-full bg-gray-700 p-2 rounded" />
-    </div>
-    <div>
-      <label class="block text-sm">Stop Loss (pips)</label>
-      <input type="number" class="w-full bg-gray-700 p-2 rounded" />
-    </div>
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex flex-col gap-8">
+            <!-- Calculator Header -->
+            <div class="flex flex-col items-center text-center slide-up">
+                <h1 class="text-3xl font-bold text-white mb-2">Calculateur de Position</h1>
+                <p class="text-gray-400 max-w-2xl">Optimisez votre gestion de risque en calculant la taille de position idéale selon votre stratégie de trading</p>
+            </div>
+            
+            <!-- Calculator Tabs -->
+            <div class="flex border-b border-gray-800 slide-up delay-1">
+                <button id="riskTab" class="tab-active px-6 py-3 text-sm font-medium transition-all duration-300">
+                    <i class="fas fa-shield-alt mr-2"></i>Par Risque
+                </button>
+                <button id="marginTab" class="tab-inactive px-6 py-3 text-sm font-medium transition-all duration-300">
+                    <i class="fas fa-coins mr-2"></i>Par Marge
+                </button>
+                <button id="pipTab" class="tab-inactive px-6 py-3 text-sm font-medium transition-all duration-300">
+                    <i class="fas fa-chart-line mr-2"></i>Par Valeur Pip
+                </button>
+            </div>
+            
+            <!-- Calculator Content -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Calculator Form -->
+                <div class="card-glass rounded-xl p-6 lg:col-span-2 slide-up delay-2">
+                    <!-- Risk Calculator (Default Visible) -->
+                    <div id="riskCalculator" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="accountCurrency" class="block text-sm font-medium text-gray-300 mb-2">Devise du compte</label>
+                                <select id="accountCurrency" class="input-field w-full px-4 py-3 rounded-lg text-white focus:outline-none">
+                                    <option value="USD">USD ($)</option>
+                                    <option value="EUR">EUR (€)</option>
+                                    <option value="GBP">GBP (£)</option>
+                                    <option value="JPY">JPY (¥)</option>
+                                    <option value="CAD">CAD (C$)</option>
+                                    <option value="AUD">AUD (A$)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="accountBalance" class="block text-sm font-medium text-gray-300 mb-2">Balance du compte</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-400">$</span>
+                                    </div>
+                                    <input type="number" id="accountBalance" value="10000" class="input-field w-full pl-8 pr-4 py-3 rounded-lg text-white focus:outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="riskPercentage" class="block text-sm font-medium text-gray-300 mb-2">Risque par trade (%)</label>
+                                <div class="flex items-center space-x-4">
+                                    <input type="range" id="riskPercentageSlider" min="0.1" max="10" step="0.1" value="1" class="w-full">
+                                    <input type="number" id="riskPercentage" min="0.1" max="10" step="0.1" value="1" class="input-field w-20 px-3 py-2 rounded-lg text-white text-center focus:outline-none">
+                                </div>
+                                <div class="text-xs text-gray-400 mt-1">Recommandé: 1-2%</div>
+                            </div>
+                            <div>
+                                <label for="stopLossPips" class="block text-sm font-medium text-gray-300 mb-2">Stop Loss (pips)</label>
+                                <input type="number" id="stopLossPips" value="30" class="input-field w-full px-4 py-3 rounded-lg text-white focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="pair" class="block text-sm font-medium text-gray-300 mb-2">Paire de devises</label>
+                                <select id="pair" class="input-field w-full px-4 py-3 rounded-lg text-white focus:outline-none">
+                                    <option value="EURUSD">EUR/USD</option>
+                                    <option value="GBPUSD">GBP/USD</option>
+                                    <option value="USDJPY">USD/JPY</option>
+                                    <option value="AUDUSD">AUD/USD</option>
+                                    <option value="USDCAD">USD/CAD</option>
+                                    <option value="USDCHF">USD/CHF</option>
+                                    <option value="NZDUSD">NZD/USD</option>
+                                    <option value="EURGBP">EUR/GBP</option>
+                                    <option value="EURJPY">EUR/JPY</option>
+                                    <option value="GBPJPY">GBP/JPY</option>
+                                    <option value="XAUUSD">XAU/USD (Or)</option>
+                                    <option value="XAGUSD">XAG/USD (Argent)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="lotType" class="block text-sm font-medium text-gray-300 mb-2">Type de lot</label>
+                                <select id="lotType" class="input-field w-full px-4 py-3 rounded-lg text-white focus:outline-none">
+                                    <option value="standard">Standard (1 lot = 100,000)</option>
+                                    <option value="mini">Mini (1 lot = 10,000)</option>
+                                    <option value="micro">Micro (1 lot = 1,000)</option>
+                                    <option value="nano">Nano (1 lot = 100)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="pt-4 border-t border-gray-700">
+                            <button id="calculateRisk" class="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition duration-300">
+                                <i class="fas fa-calculator mr-2"></i> Calculer la taille de position
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Margin Calculator (Hidden by Default) -->
+                    <div id="marginCalculator" class="space-y-6 hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="marginAccountCurrency" class="block text-sm font-medium text-gray-300 mb-2">Devise du compte</label>
+                                <select id="marginAccountCurrency" class="input-field w-full px-4 py-3 rounded-lg text-white focus:outline-none">
+                                    <option value="USD">USD ($)</option>
+                                    <option value="EUR">EUR (€)</option>
+                                    <option value="GBP">GBP (£)</option>
+                                    <option value="JPY">JPY (¥)</option>
+                                    <option value="CAD">CAD (C$)</option>
+                                    <option value="AUD">AUD (A$)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="leverage" class="block text-sm font-medium text-gray-300 mb-2">Effet de levier</label>
+                                <select id="leverage" class="input-field w-full px-4 py-3 rounded-lg text-white focus:outline-none">
+                                    <option value="1">1:1</option>
+                                    <option value="10">1:10</option>
+                                    <option value="20">1:20</option>
+                                    <option value="30">1:30</option>
+                                    <option value="50" selected>1:50</option>
+                                    <option value="100">1:100</option>
+                                    <option value="200">1:200</option>
+                                    <option value="300">1:300</option>
+                                    <option value="400">1:400</option>
+                                    <option value="500">1:500</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="marginPair" class="block text-sm font-medium text-gray-300 mb-2">Paire de devises</label>
+                                <select id="marginPair" class="input-field w-full px-4 py-3 rounded-lg text-white focus:outline-none">
+                                    <option value="EURUSD">EUR/USD</option>
+                                    <option value="GBPUSD">GBP/USD</option>
+                                    <option value="USDJPY">USD/JPY</option>
+                                    <option value="AUDUSD">AUD/USD</option>
+                                    <option value="USDCAD">USD/CAD</option>
+                                    <option value="USDCHF">USD/CHF</option>
+                                    <option value="NZDUSD">NZD/USD</option>
+                                    <option value="EURGBP">EUR/GBP</option>
+                                    <option value="EURJPY">EUR/JPY</option>
+                                    <option value="GBPJPY">GBP/JPY</option>
+                                    <option value="XAUUSD">XAU/USD (Or)</option>
+                                    <option value="XAGUSD">XAG/USD (Argent)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="marginLotType" class="block text-sm font-medium text-gray-300 mb-2">Type de lot</label>
+                                <select id="marginLotType" class="input-field w-full px-4 py-3 rounded-lg text-white focus:outline-none">
+                                    <option value="standard">Standard (1 lot = 100,000)</option>
+                                    <option value="mini">Mini (1 lot = 10,000)</option>
+                                    <option value="micro">Micro (1 lot = 1,000)</option>
+                                    <option value="nano">Nano (1 lot = 100)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="positionSize" class="block text-sm font-medium text-gray-300 mb-2">Taille de position (lots)</label>
+                                <input type="number" id="positionSize" value="0.1" step="0.01" class="input-field w-full px-4 py-3 rounded-lg text-white focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="currentPrice" class="block text-sm font-medium text-gray-300 mb-2">Prix actuel</label>
+                                <input type="number" id="currentPrice" value="1.0800" step="0.0001" class="input-field w-full px-4 py-3 rounded-lg text-white focus:outline-none">
+                            </div>
+                        </div>
+                        
+                        <div class="pt-4 border-t border-gray-700">
+                            <button id="calculateMargin" class="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition duration-300">
+                                <i class="fas fa-calculator mr-2"></i> Calculer la marge requise
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Pip Calculator (Hidden by Default) -->
+                    <div id="pipCalculator" class="space-y-6 hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="pipAccountCurrency" class="block text-sm font-medium text-gray-300 mb-2">Devise du compte</label>
+                                <select id="pipAccountCurrency" class="input-field w-full px-4 py-3 rounded-lg text-white focus:outline-none">
+                                    <option value="USD">USD ($)</option>
+                                    <option value="EUR">EUR (€)</option>
+                                    <option value="GBP">GBP (£)</option>
+                                    <option value="JPY">JPY (¥)</option>
+                                    <option value="CAD">CAD (C$)</option>
+                                    <option value="AUD">AUD (A$)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="pipPair" class="block text-sm font-medium text-gray-300 mb-2">Paire de devises</label>
+                                <select id="pipPair" class="input-field w-full px-4 py-3 rounded-lg text-white focus:outline-none">
+                                    <option value="EURUSD">EUR/USD</option>
+                                    <option value="GBPUSD">GBP/USD</option>
+                                    <option value="USDJPY">USD/JPY</option>
+                                    <option value="AUDUSD">AUD/USD</option>
+                                    <option value="USDCAD">USD/CAD</option>
+                                    <option value="USDCHF">USD/CHF</option>
+                                    <option value="NZDUSD">NZD/USD</option>
+                                    <option value="EURGBP">EUR/GBP</option>
+                                    <option value="EURJPY">EUR/JPY</option>
+                                    <option value="GBPJPY">GBP/JPY</option>
+                                    <option value="XAUUSD">XAU/USD (Or)</option>
+                                    <option value="XAGUSD">XAG/USD (Argent)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="pipLotType" class="block text-sm font-medium text-gray-300 mb-2">Type de lot</label>
+                                <select id="pipLotType" class="input-field w-full px-4 py-3 rounded-lg text-white focus:outline-none">
+                                    <option value="standard">Standard (1 lot = 100,000)</option>
+                                    <option value="mini">Mini (1 lot = 10,000)</option>
+                                    <option value="micro">Micro (1 lot = 1,000)</option>
+                                    <option value="nano">Nano (1 lot = 100)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="pipPositionSize" class="block text-sm font-medium text-gray-300 mb-2">Taille de position (lots)</label>
+                                <input type="number" id="pipPositionSize" value="0.1" step="0.01" class="input-field w-full px-4 py-3 rounded-lg text-white focus:outline-none">
+                            </div>
+                        </div>
+                        
+                        <div class="pt-4 border-t border-gray-700">
+                            <button id="calculatePip" class="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition duration-300">
+                                <i class="fas fa-calculator mr-2"></i> Calculer la valeur pip
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Calculator Results -->
+                <div class="card-glass rounded-xl p-6 slide-up delay-3">
+                    <h3 class="text-lg font-semibold text-white mb-6">Résultats du calcul</h3>
+                    
+                    <div id="riskResults" class="space-y-6">
+                        <div class="bg-gray-800/50 rounded-lg p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-300">Taille de position</span>
+                                <span id="positionSizeResult" class="text-lg font-bold text-white">0.10 lots</span>
+                            </div>
+                            <div class="text-xs text-gray-400">(10,000 unités)</div>
+                        </div>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-300">Montant à risque</span>
+                                <span id="riskAmountResult" class="text-lg font-bold text-white">$100.00</span>
+                            </div>
+                            <div class="text-xs text-gray-400">1% de $10,000</div>
+                        </div>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-300">Valeur pip</span>
+                                <span id="pipValueResult" class="text-lg font-bold text-white">$1.00</span>
+                            </div>
+                            <div class="text-xs text-gray-400">Pour 1 lot standard</div>
+                        </div>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-300">Marge requise</span>
+                                <span id="marginRequiredResult" class="text-lg font-bold text-white">$200.00</span>
+                            </div>
+                            <div class="text-xs text-gray-400">Avec un levier 1:50</div>
+                        </div>
+                        
+                        <div class="pt-4 border-t border-gray-700">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-medium text-gray-300">Ratio risque/récompense</span>
+                                <div class="flex items-center space-x-2">
+                                    <input type="number" id="rrRatio" value="2" min="0.1" step="0.1" class="input-field w-16 px-2 py-1 rounded-lg text-white text-center focus:outline-none">
+                                    <span class="text-sm text-white">:1</span>
+                                </div>
+                            </div>
+                            <div class="mt-3 bg-gray-800/50 rounded-lg p-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-medium text-gray-300">Profit potentiel</span>
+                                    <span id="potentialProfit" class="text-lg font-bold text-profit">+$200.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="marginResults" class="space-y-6 hidden">
+                        <div class="bg-gray-800/50 rounded-lg p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-300">Marge requise</span>
+                                <span id="marginResult" class="text-lg font-bold text-white">$216.00</span>
+                            </div>
+                            <div class="text-xs text-gray-400">Pour 0.1 lots sur EUR/USD</div>
+                        </div>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-300">Valeur pip</span>
+                                <span id="marginPipValue" class="text-lg font-bold text-white">$1.00</span>
+                            </div>
+                            <div class="text-xs text-gray-400">Pour 1 lot standard</div>
+                        </div>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-300">Pourcentage utilisé</span>
+                                <span id="marginPercentage" class="text-lg font-bold text-white">2.16%</span>
+                            </div>
+                            <div class="text-xs text-gray-400">D'un compte de $10,000</div>
+                        </div>
+                    </div>
+                    
+                    <div id="pipResults" class="space-y-6 hidden">
+                        <div class="bg-gray-800/50 rounded-lg p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-300">Valeur pip</span>
+                                <span id="pipResult" class="text-lg font-bold text-white">$1.00</span>
+                            </div>
+                            <div class="text-xs text-gray-400">Pour 1 lot standard</div>
+                        </div>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-300">Valeur pip pour position</span>
+                                <span id="pipPositionResult" class="text-lg font-bold text-white">$0.10</span>
+                            </div>
+                            <div class="text-xs text-gray-400">Pour 0.1 lots</div>
+                        </div>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-300">Profit pour 10 pips</span>
+                                <span id="pipProfit10" class="text-lg font-bold text-profit">+$1.00</span>
+                            </div>
+                            <div class="text-xs text-gray-400">Avec 0.1 lots</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Risk Management Tips -->
+            <div class="card-glass rounded-xl p-6 slide-up delay-3">
+                <h3 class="text-lg font-semibold text-white mb-4">Conseils de gestion de risque</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-gray-800/50 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="p-2 rounded-full bg-primary/20 mr-3">
+                                <i class="fas fa-shield-alt text-primary"></i>
+                            </div>
+                            <h4 class="font-medium text-white">Risque par trade</h4>
+                        </div>
+                        <p class="text-sm text-gray-400">Ne risquez jamais plus de 1-2% de votre capital sur un seul trade. Cela vous permet de survivre à une série de pertes.</p>
+                    </div>
+                    
+                    <div class="bg-gray-800/50 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="p-2 rounded-full bg-primary/20 mr-3">
+                                <i class="fas fa-balance-scale text-primary"></i>
+                            </div>
+                            <h4 class="font-medium text-white">Ratio R:R</h4>
+                        </div>
+                        <p class="text-sm text-gray-400">Visez un ratio risque/récompense d'au moins 1:2. Cela signifie que votre profit potentiel est au moins le double de votre risque.</p>
+                    </div>
+                    
+                    <div class="bg-gray-800/50 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="p-2 rounded-full bg-primary/20 mr-3">
+                                <i class="fas fa-chart-pie text-primary"></i>
+                            </div>
+                            <h4 class="font-medium text-white">Diversification</h4>
+                        </div>
+                        <p class="text-sm text-gray-400">Évitez de concentrer trop de capital sur un seul trade ou une seule paire de devises. Diversifiez vos positions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
-    <button type="submit" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">Calculer</button>
-  </form>
+    <!-- Footer -->
+    <footer class="bg-black py-8 border-t border-gray-800 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-gray-400 text-sm">
+                <p>© 2025 Astral Trading. Tous droits réservés.</p>
+                <p class="mt-1">Le trading comporte des risques de perte en capital.</p>
+            </div>
+        </div>
+    </footer>
 
-  <!-- Ajoute ici un script JS plus tard pour faire le calcul -->
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching functionality
+            const riskTab = document.getElementById('riskTab');
+            const marginTab = document.getElementById('marginTab');
+            const pipTab = document.getElementById('pipTab');
+            
+            const riskCalculator = document.getElementById('riskCalculator');
+            const marginCalculator = document.getElementById('marginCalculator');
+            const pipCalculator = document.getElementById('pipCalculator');
+            
+            const riskResults = document.getElementById('riskResults');
+            const marginResults = document.getElementById('marginResults');
+            const pipResults = document.getElementById('pipResults');
+            
+            // Default to risk calculator
+            riskTab.classList.add('tab-active');
+            riskTab.classList.remove('tab-inactive');
+            riskCalculator.classList.remove('hidden');
+            riskResults.classList.remove('hidden');
+            
+            // Tab click handlers
+            riskTab.addEventListener('click', function() {
+                // Update tabs
+                riskTab.classList.add('tab-active');
+                riskTab.classList.remove('tab-inactive');
+                marginTab.classList.remove('tab-active');
+                marginTab.classList.add('tab-inactive');
+                pipTab.classList.remove('tab-active');
+                pipTab.classList.add('tab-inactive');
+                
+                // Update calculators
+                riskCalculator.classList.remove('hidden');
+                marginCalculator.classList.add('hidden');
+                pipCalculator.classList.add('hidden');
+                
+                // Update results
+                riskResults.classList.remove('hidden');
+                marginResults.classList.add('hidden');
+                pipResults.classList.add('hidden');
+            });
+            
+            marginTab.addEventListener('click', function() {
+                // Update tabs
+                marginTab.classList.add('tab-active');
+                marginTab.classList.remove('tab-inactive');
+                riskTab.classList.remove('tab-active');
+                riskTab.classList.add('tab-inactive');
+                pipTab.classList.remove('tab-active');
+                pipTab.classList.add('tab-inactive');
+                
+                // Update calculators
+                marginCalculator.classList.remove('hidden');
+                riskCalculator.classList.add('hidden');
+                pipCalculator.classList.add('hidden');
+                
+                // Update results
+                marginResults.classList.remove('hidden');
+                riskResults.classList.add('hidden');
+                pipResults.classList.add('hidden');
+            });
+            
+            pipTab.addEventListener('click', function() {
+                // Update tabs
+                pipTab.classList.add('tab-active');
+                pipTab.classList.remove('tab-inactive');
+                riskTab.classList.remove('tab-active');
+                riskTab.classList.add('tab-inactive');
+                marginTab.classList.remove('tab-active');
+                marginTab.classList.add('tab-inactive');
+                
+                // Update calculators
+                pipCalculator.classList.remove('hidden');
+                riskCalculator.classList.add('hidden');
+                marginCalculator.classList.add('hidden');
+                
+                // Update results
+                pipResults.classList.remove('hidden');
+                riskResults.classList.add('hidden');
+                marginResults.classList.add('hidden');
+            });
+            
+            // Risk Calculator Logic
+            document.getElementById('calculateRisk').addEventListener('click', function() {
+                const accountBalance = parseFloat(document.getElementById('accountBalance').value);
+                const riskPercentage = parseFloat(document.getElementById('riskPercentage').value);
+                const stopLossPips = parseFloat(document.getElementById('stopLossPips').value);
+                const pair = document.getElementById('pair').value;
+                const lotType = document.getElementById('lotType').value;
+                const rrRatio = parseFloat(document.getElementById('rrRatio').value);
+                
+                // Calculate risk amount
+                const riskAmount = accountBalance * (riskPercentage / 100);
+                
+                // Determine pip value based on pair and lot type
+                let pipValue = 10; // Default for XXX/USD pairs with standard lots
+                let lotSize = 100000; // Standard lot
+                
+                // Adjust for lot type
+                if (lotType === 'mini') lotSize = 10000;
+                else if (lotType === 'micro') lotSize = 1000;
+                else if (lotType === 'nano') lotSize = 100;
+                
+                // For pairs where USD is not the quote currency
+                if (pair === 'USDJPY' || pair === 'USDCAD' || pair === 'USDCHF') {
+                    pipValue = 1000 / 120; // Example for USDJPY, would need current price for exact
+                } else if (pair === 'XAUUSD') {
+                    pipValue = 1; // For gold, 1 pip is $0.01 for micro lots
+                }
+                
+                // Calculate position size
+                const positionSize = (riskAmount / (stopLossPips * pipValue)) * (100000 / lotSize);
+                
+                // Calculate margin required (simplified)
+                const marginRequired = (lotSize * positionSize) / 50; // Assuming 1:50 leverage
+                
+                // Update results
+                document.getElementById('positionSizeResult').textContent = positionSize.toFixed(2) + ' lots';
+                document.getElementById('riskAmountResult').textContent = '$' + riskAmount.toFixed(2);
+                document.getElementById('pipValueResult').textContent = '$' + pipValue.toFixed(2);
+                document.getElementById('marginRequiredResult').textContent = '$' + marginRequired.toFixed(2);
+                document.getElementById('potentialProfit').textContent = '+$' + (riskAmount * rrRatio).toFixed(2);
+            });
+            
+            // Margin Calculator Logic
+            document.getElementById('calculateMargin').addEventListener('click', function() {
+                const positionSize = parseFloat(document.getElementById('positionSize').value);
+                const leverage = parseInt(document.getElementById('leverage').value);
+                const currentPrice = parseFloat(document.getElementById('currentPrice').value);
+                const pair = document.getElementById('marginPair').value;
+                const lotType = document.getElementById('marginLotType').value;
+                
+                let lotSize = 100000; // Standard lot
+                if (lotType === 'mini') lotSize = 10000;
+                else if (lotType === 'micro') lotSize = 1000;
+                else if (lotType === 'nano') lotSize = 100;
+                
+                // Calculate margin required
+                let marginRequired;
+                if (pair === 'XAUUSD' || pair === 'XAGUSD') {
+                    // For commodities, margin calculation is different
+                    marginRequired = (positionSize * lotSize * currentPrice) / leverage;
+                } else {
+                    // For forex pairs
+                    marginRequired = (positionSize * lotSize) / leverage;
+                }
+                
+                // Calculate pip value (simplified)
+                let pipValue = 10; // Default for XXX/USD
+                if (pair === 'USDJPY') pipValue = 1000 / 120; // Simplified
+                
+                // Update results
+                document.getElementById('marginResult').textContent = '$' + marginRequired.toFixed(2);
+                document.getElementById('marginPipValue').textContent = '$' + pipValue.toFixed(2);
+                
+                // Calculate percentage of account used
+                const accountBalance = 10000; // Could make this dynamic
+                const percentageUsed = (marginRequired / accountBalance) * 100;
+                document.getElementById('marginPercentage').textContent = percentageUsed.toFixed(2) + '%';
+            });
+            
+            // Pip Calculator Logic
+            document.getElementById('calculatePip').addEventListener('click', function() {
+                const positionSize = parseFloat(document.getElementById('pipPositionSize').value);
+                const pair = document.getElementById('pipPair').value;
+                const lotType = document.getElementById('pipLotType').value;
+                
+                let lotSize = 100000; // Standard lot
+                if (lotType === 'mini') lotSize = 10000;
+                else if (lotType === 'micro') lotSize = 1000;
+                else if (lotType === 'nano') lotSize = 100;
+                
+                // Calculate pip value (simplified)
+                let pipValue = 10; // Default for XXX/USD
+                if (pair === 'USDJPY') pipValue = 1000 / 120; // Simplified
+                else if (pair === 'XAUUSD') pipValue = 1;
+                
+                // Adjust for position size
+                const pipValueForPosition = (pipValue * positionSize * lotSize) / 100000;
+                
+                // Update results
+                document.getElementById('pipResult').textContent = '$' + pipValue.toFixed(2);
+                document.getElementById('pipPositionResult').textContent = '$' + pipValueForPosition.toFixed(2);
+                document.getElementById('pipProfit10').textContent = '+$' + (pipValueForPosition * 10).toFixed(2);
+            });
+            
+            // Sync risk percentage slider and input
+            const riskPercentageSlider = document.getElementById('riskPercentageSlider');
+            const riskPercentageInput = document.getElementById('riskPercentage');
+            
+            riskPercentageSlider.addEventListener('input', function() {
+                riskPercentageInput.value = this.value;
+            });
+            
+            riskPercentageInput.addEventListener('input', function() {
+                riskPercentageSlider.value = this.value;
+            });
+            
+            // Initial calculations
+            document.getElementById('calculateRisk').click();
+            document.getElementById('calculateMargin').click();
+            document.getElementById('calculatePip').click();
+            
+            // Animation on load
+            const elements = document.querySelectorAll('.slide-up');
+            elements.forEach(element => {
+                element.style.animationPlayState = 'running';
+            });
+        });
+    </script>
 </body>
 </html>

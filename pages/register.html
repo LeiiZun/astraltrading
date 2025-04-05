@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AstralTrading - Connexion</title>
+    <title>AstralTrading - Inscription</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -103,6 +103,26 @@
         .auth-divider::after {
             margin-left: 1rem;
         }
+        
+        .password-strength {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-top: 8px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .password-hint {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body class="gradient-bg">
@@ -128,53 +148,105 @@
     <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="w-full max-w-md space-y-8 slide-up">
             <div class="text-center">
-                <h2 class="mt-6 text-3xl font-bold text-white">Connectez-vous</h2>
+                <h2 class="mt-6 text-3xl font-bold text-white">Créez votre compte</h2>
                 <p class="mt-2 text-sm text-gray-400">
-                    Accédez à votre espace membre
+                    Rejoignez notre communauté de traders
                 </p>
             </div>
             
             <div class="card-glass rounded-xl shadow-sm p-8">
-                <form class="mt-8 space-y-6" action="#" method="POST">
-                    <input type="hidden" name="remember" value="true">
-                    <div class="rounded-md space-y-4">
+                <form class="mt-8 space-y-4" action="#" method="POST">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="email-address" class="sr-only">Adresse email</label>
+                            <label for="first-name" class="sr-only">Prénom</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-envelope text-gray-500"></i>
+                                    <i class="fas fa-user text-gray-500"></i>
                                 </div>
-                                <input id="email-address" name="email" type="email" autocomplete="email" required 
+                                <input id="first-name" name="first-name" type="text" autocomplete="given-name" required 
                                        class="input-field pl-10 w-full px-4 py-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary"
-                                       placeholder="Adresse email">
+                                       placeholder="Prénom">
                             </div>
                         </div>
                         <div>
-                            <label for="password" class="sr-only">Mot de passe</label>
+                            <label for="last-name" class="sr-only">Nom</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-lock text-gray-500"></i>
+                                    <i class="fas fa-user text-gray-500"></i>
                                 </div>
-                                <input id="password" name="password" type="password" autocomplete="current-password" required 
+                                <input id="last-name" name="last-name" type="text" autocomplete="family-name" required 
                                        class="input-field pl-10 w-full px-4 py-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary"
-                                       placeholder="Mot de passe">
+                                       placeholder="Nom">
                             </div>
                         </div>
                     </div>
-
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <input id="remember-me" name="remember-me" type="checkbox" 
-                                   class="h-4 w-4 text-primary focus:ring-primary border-gray-600 rounded">
-                            <label for="remember-me" class="ml-2 block text-sm text-gray-300">
-                                Se souvenir de moi
+                    
+                    <div>
+                        <label for="email" class="sr-only">Adresse email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-envelope text-gray-500"></i>
+                            </div>
+                            <input id="email" name="email" type="email" autocomplete="email" required 
+                                   class="input-field pl-10 w-full px-4 py-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary"
+                                   placeholder="Adresse email">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="password" class="sr-only">Mot de passe</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-500"></i>
+                            </div>
+                            <input id="password" name="password" type="password" autocomplete="new-password" required 
+                                   class="input-field pl-10 w-full px-4 py-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary"
+                                   placeholder="Mot de passe">
+                            <button type="button" class="password-toggle absolute right-0 top-0 h-full px-3 flex items-center">
+                                <i class="fas fa-eye text-gray-500 hover:text-gray-300"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength">
+                            <div id="password-strength-bar" class="password-strength-bar"></div>
+                        </div>
+                        <div id="password-hint" class="password-hint">
+                            Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="confirm-password" class="sr-only">Confirmez le mot de passe</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-500"></i>
+                            </div>
+                            <input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password" required 
+                                   class="input-field pl-10 w-full px-4 py-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary"
+                                   placeholder="Confirmez le mot de passe">
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="terms" name="terms" type="checkbox" required
+                                   class="focus:ring-primary h-4 w-4 text-primary border-gray-600 rounded">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="terms" class="font-medium text-gray-300">
+                                J'accepte les <a href="#" class="text-primary hover:text-primary/80">Conditions Générales</a> et la <a href="#" class="text-primary hover:text-primary/80">Politique de Confidentialité</a>
                             </label>
                         </div>
-
-                        <div class="text-sm">
-                            <a href="#" class="font-medium text-primary hover:text-primary/80">
-                                Mot de passe oublié ?
-                            </a>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="newsletter" name="newsletter" type="checkbox"
+                                   class="focus:ring-primary h-4 w-4 text-primary border-gray-600 rounded">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="newsletter" class="font-medium text-gray-300">
+                                Je souhaite recevoir des conseils et offres exclusives par email
+                            </label>
                         </div>
                     </div>
 
@@ -182,16 +254,16 @@
                         <button type="submit" 
                                 class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition">
                             <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                                <i class="fas fa-sign-in-alt"></i>
+                                <i class="fas fa-user-plus"></i>
                             </span>
-                            Connexion
+                            S'inscrire
                         </button>
                     </div>
                 </form>
                 
                 <div class="mt-6">
                     <div class="auth-divider">
-                        <span class="text-xs">OU CONTINUER AVEC</span>
+                        <span class="text-xs">OU INSCRIVEZ-VOUS AVEC</span>
                     </div>
                     
                     <div class="mt-6 grid grid-cols-2 gap-3">
@@ -213,16 +285,12 @@
                 
                 <div class="mt-6 text-center">
                     <p class="text-sm text-gray-400">
-                        Nouveau sur Astral Trading ?
-                        <a href="C:\Users\deadp\Desktop\AstralTrading\pages\register.html" class="font-medium text-primary hover:text-primary/80">
-                            Créer un compte
+                        Vous avez déjà un compte ?
+                        <a href="login.html" class="font-medium text-primary hover:text-primary/80">
+                            Connectez-vous
                         </a>
                     </p>
                 </div>
-            </div>
-            
-            <div class="text-center text-xs text-gray-500">
-                <p>En vous connectant, vous acceptez nos <a href="#" class="text-primary hover:underline">CGU</a> et notre <a href="#" class="text-primary hover:underline">Politique de confidentialité</a>.</p>
             </div>
         </div>
     </main>
@@ -246,14 +314,14 @@
                 element.style.animationPlayState = 'running';
             });
             
-            // Focus on email field
-            document.getElementById('email-address').focus();
+            // Focus on first name field
+            document.getElementById('first-name').focus();
         });
 
-        // Password visibility toggle (you can enhance this further)
+        // Password visibility toggle
         document.querySelectorAll('.password-toggle').forEach(button => {
             button.addEventListener('click', function() {
-                const input = this.previousElementSibling;
+                const input = this.parentNode.querySelector('input');
                 const icon = this.querySelector('i');
                 
                 if (input.type === 'password') {
@@ -264,6 +332,52 @@
                     icon.classList.replace('fa-eye-slash', 'fa-eye');
                 }
             });
+        });
+
+        // Password strength indicator
+        const passwordInput = document.getElementById('password');
+        const strengthBar = document.getElementById('password-strength-bar');
+        const passwordHint = document.getElementById('password-hint');
+        
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            
+            // Check for length
+            if (password.length >= 8) strength += 1;
+            if (password.length >= 12) strength += 1;
+            
+            // Check for uppercase letters
+            if (/[A-Z]/.test(password)) strength += 1;
+            
+            // Check for numbers
+            if (/[0-9]/.test(password)) strength += 1;
+            
+            // Check for special characters
+            if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+            
+            // Update strength bar
+            const width = (strength / 5) * 100;
+            strengthBar.style.width = width + '%';
+            
+            // Update colors
+            if (strength <= 1) {
+                strengthBar.style.backgroundColor = '#ef4444'; // red
+                passwordHint.style.color = '#ef4444';
+            } else if (strength <= 3) {
+                strengthBar.style.backgroundColor = '#f59e0b'; // amber
+                passwordHint.style.color = '#f59e0b';
+            } else {
+                strengthBar.style.backgroundColor = '#10b981'; // emerald
+                passwordHint.style.color = '#10b981';
+            }
+            
+            // Hide hint when password is strong
+            if (strength >= 4) {
+                passwordHint.textContent = 'Mot de passe fort ✓';
+            } else {
+                passwordHint.textContent = 'Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.';
+            }
         });
     </script>
 </body>

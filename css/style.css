@@ -1,0 +1,12 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .glow {
+    text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
+  }
+  
+  .plan-card {
+    @apply bg-gray-800 p-6 rounded-xl shadow-xl text-center hover:scale-105 transform transition-all duration-300;
+  }
+  

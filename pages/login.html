@@ -115,14 +115,43 @@
                         <span class="text-xl font-bold text-white">Astral<span class="text-primary"> Trading</span></span>
                     </div>
                 </div>
+                
+                <!-- Menu Principal (visible sur les grands écrans) -->
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-center space-x-8">
-                        <a href="C:\Users\deadp\Desktop\AstralTrading\index.html" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Retour à l'accueil</a>
+                        <a href="index.html" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Retour à l'accueil</a>
                     </div>
+                </div>
+                
+                <!-- Mobile Menu Button (visible uniquement sur mobile) -->
+                <div class="md:hidden flex items-center ml-4">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-700 focus:outline-none" id="mobile-menu-button">
+                        <span class="sr-only">Menu</span>
+                        <i class="fas fa-bars"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
+
+    <!-- Mobile Menu (hidden by default) -->
+    <div class="md:hidden" id="mobile-menu" style="display: none;">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <a href="index.html" class="text-gray-300 hover:text-white block px-3 py-2 text-base font-medium">Retour à l'accueil</a>
+        </div>
+    </div>
+
+    <!-- Script to toggle mobile menu -->
+    <script>
+        document.getElementById("mobile-menu-button").addEventListener("click", function() {
+            var menu = document.getElementById("mobile-menu");
+            if (menu.style.display === "none" || menu.style.display === "") {
+                menu.style.display = "block";
+            } else {
+                menu.style.display = "none";
+            }
+        });
+    </script>
 
     <!-- Main Content -->
     <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -214,7 +243,7 @@
                 <div class="mt-6 text-center">
                     <p class="text-sm text-gray-400">
                         Nouveau sur Astral Trading ?
-                        <a href="C:\Users\deadp\Desktop\AstralTrading\pages\register.html" class="font-medium text-primary hover:text-primary/80">
+                        <a href="pages\register.html" class="font-medium text-primary hover:text-primary/80">
                             Créer un compte
                         </a>
                     </p>

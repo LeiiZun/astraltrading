@@ -131,11 +131,83 @@
             stroke-dashoffset: 1000;
             animation: dash 5s linear forwards;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+            background: linear-gradient(145deg, #1a1a1a, #222222);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .success-graph {
+            position: relative;
+            height: 100px;
+            width: 100%;
+        }
+        
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+            background-color: rgba(15, 15, 15, 0.8);
+        }
+        
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+        }
         
         @keyframes dash {
             to {
                 stroke-dashoffset: 0;
             }
+        }
+
+        /* Mobile Menu Styles */
+        .mobile-menu {
+            display: none;
+        }
+
+        .mobile-menu.open {
+            display: block;
+        }
+
+        .mobile-menu a {
+            padding: 1rem;
+            display: block;
+            text-white;
+            text-sm;
+            font-medium;
+            border-b: 1px solid #444;
+        }
+
+        .menu-btn.open i {
+            transform: rotate(90deg);
         }
     </style>
 </head>
@@ -149,17 +221,19 @@
                         <span class="text-xl font-bold text-white">Astral<span class="text-primary"> Trading</span></span>
                     </div>
                 </div>
+                <!-- Desktop Menu -->
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-center space-x-8">
                         <a href="#home" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Accueil</a>
-                        <a href="C:\Users\deadp\Desktop\AstralTrading\pages\cours.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Cours</a>
-                        <a href="C:\Users\deadp\Desktop\AstralTrading\pages\calculateur.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Calculateur</a>
-                        <a href="C:\Users\deadp\Desktop\AstralTrading\pages\journal.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
-                        <a href="C:\Users\deadp\Desktop\AstralTrading\pages\login.html" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm font-medium transition">Connexion</a>
+                        <a href="pages\cours.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Cours</a>
+                        <a href="pages\calculateur.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Calculateur</a>
+                        <a href="pages\journal.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
+                        <a href="pages\login.html" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm font-medium transition">Connexion</a>
                     </div>
                 </div>
+                <!-- Mobile Menu Button -->
                 <div class="-mr-2 flex md:hidden">
-                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none menu-btn" aria-controls="mobile-menu" aria-expanded="false">
                         <span class="sr-only">Menu</span>
                         <i class="fas fa-bars"></i>
                     </button>
@@ -167,6 +241,26 @@
             </div>
         </div>
     </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu hidden md:hidden" id="mobile-menu">
+        <a href="#home" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Accueil</a>
+        <a href="pages\cours.html" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Cours</a>
+        <a href="pages\calculateur.html" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Calculateur</a>
+        <a href="pages\journal.html" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
+        <a href="pages\login.html" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm font-medium transition">Connexion</a>
+    </div>
+
+    <script>
+        // Mobile Menu Toggle
+        const menuBtn = document.querySelector('.menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('open');
+            menuBtn.classList.toggle('open');
+        });
+    </script>
 
     <!-- Hero Section -->
     <section id="home" class="relative overflow-hidden py-20 md:py-32">
@@ -176,8 +270,8 @@
                     <h1 class="text-4xl md:text-5xl font-bold mb-4">Maîtrisez le Trading avec <span class="text-primary">Astral !</span></h1>
                     <p class="text-xl text-gray-300 mb-8">Notre méthode, expliquée et appliquée pour des résultats concrets.</p>
                     <div class="flex space-x-4">
-                        <a href="#courses" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition">Commencer</a>
-                        <a href="#calculator" class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-medium border border-white/10 transition">Calculateur</a>
+                        <a href="https://t.me/astraltradingfr" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition">Notre Télégram</a>
+                        <a href="pages\calculateur.html" class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-medium border border-white/10 transition">Calculateur</a>
                     </div>
                 </div>
                 <div class="md:w-1/2 flex justify-center slide-up delay-1">
@@ -214,443 +308,137 @@
         </div>
     </section>
 
-    <!-- ICT Concepts Section -->
-    <section id="courses" class="py-16">
+    <!-- About Section -->
+    <section id="about" class="relative overflow-hidden py-20 md:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16 slide-up">
-                <h2 class="text-3xl font-bold text-white mb-4">Concepts Clés</h2>
-                <p class="text-lg text-gray-400 max-w-3xl mx-auto">Apprenez les piliers du trading avec nos cours structurés.</p>
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-white mb-4">Communauté de Trading sur Telegram</h2>
+                <p class="text-lg text-gray-400 max-w-3xl mx-auto">Rejoignez des milliers de traders qui améliorent leurs compétences avec nos ressources quotidiennes.</p>
             </div>
             
             <div class="grid md:grid-cols-3 gap-8">
-                <!-- Market Structure -->
-                <div class="card-glass p-6 rounded-xl hover-scale fade-in delay-1">
-                    <div class="h-40 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center mb-4">
-                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 21H21" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M3 10H21" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M3 3L21 3" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M12 3V21" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M12 10L21 3" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M12 10L3 3" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
+                <div class="card-hover p-8 rounded-xl">
+                    <div class="w-12 h-12 bg-indigo-500/10 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-indigo-400 text-xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2 text-white">La Tendance</h3>
-                    <p class="text-gray-400 mb-4">Comprenez la direction du marché avec la Théorie de Dow</p>
-                    <a href="#market-structure" class="text-primary font-medium hover:text-primary/80 transition flex items-center">
-                        Voir le cours <i class="fas fa-arrow-right ml-2 text-sm"></i>
-                    </a>
+                    <h3 class="text-xl font-bold mb-2 text-white">Signaux Quotidiens</h3>
+                    <p class="text-gray-400">Recevez des setups de trading avec points d'entrée, stop loss et take profit clairs.</p>
                 </div>
                 
-                <!-- Liquidity Pools -->
-                <div class="card-glass p-6 rounded-xl hover-scale fade-in delay-2">
-                    <div class="h-40 bg-gradient-to-r from-purple-500 to-purple-700 rounded-lg flex items-center justify-center mb-4">
-                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="white" stroke-width="2"/>
-                            <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" stroke="white" stroke-width="2"/>
-                            <path d="M12 2V8" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M12 16V22" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M22 12H16" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M8 12H2" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
+                <div class="card-hover p-8 rounded-xl">
+                    <div class="w-12 h-12 bg-indigo-500/10 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-graduation-cap text-indigo-400 text-xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2 text-white">Zones de liquidité</h3>
-                    <p class="text-gray-400 mb-4">Détectez les zones de liquidité où les institutions placent leurs ordres.</p>
-                    <a href="#liquidity-pools" class="text-primary font-medium hover:text-primary/80 transition flex items-center">
-                        Voir le cours <i class="fas fa-arrow-right ml-2 text-sm"></i>
-                    </a>
+                    <h3 class="text-xl font-bold mb-2 text-white">Contenu Éducatif</h3>
+                    <p class="text-gray-400">Apprenez avec des vidéos, PDF et sessions de trading en direct.</p>
                 </div>
                 
-                <!-- Fair Value Gap -->
-                <div class="card-glass p-6 rounded-xl hover-scale fade-in delay-3">
-                    <div class="h-40 bg-gradient-to-r from-green-500 to-green-700 rounded-lg flex items-center justify-center mb-4">
-                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 3V21H21" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M7 16L11 8L15 12L21 3" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M7 12H11V16" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
+                <div class="card-hover p-8 rounded-xl">
+                    <div class="w-12 h-12 bg-indigo-500/10 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-newspaper text-indigo-400 text-xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2 text-white">FVG</h3>
-                    <p class="text-gray-400 mb-4">Identifiez les déséquilibres de prix que le marché cherche à combler.</p>
-                    <a href="#fair-value-gap" class="text-primary font-medium hover:text-primary/80 transition flex items-center">
-                        Voir le cours <i class="fas fa-arrow-right ml-2 text-sm"></i>
-                    </a>
-                </div>
-            </div>
-            
-            <div class="grid md:grid-cols-3 gap-8 mt-8">
-                <!-- Order Blocks -->
-                <div class="card-glass p-6 rounded-xl hover-scale fade-in delay-1">
-                    <div class="h-40 bg-gradient-to-r from-red-500 to-red-700 rounded-lg flex items-center justify-center mb-4">
-                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="3" y="3" width="18" height="18" rx="2" stroke="white" stroke-width="2"/>
-                            <path d="M3 9H21" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M9 21V9" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M12 9V21" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M15 9V21" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 text-white">Order Blocks</h3>
-                    <p class="text-gray-400 mb-4">Repérez les zones où les institutions ont placé leurs ordres.</p>
-                    <a href="#order-blocks" class="text-primary font-medium hover:text-primary/80 transition flex items-center">
-                        Voir le cours <i class="fas fa-arrow-right ml-2 text-sm"></i>
-                    </a>
-                </div>
-                
-                <!-- Breaker Blocks -->
-                <div class="card-glass p-6 rounded-xl hover-scale fade-in delay-2">
-                    <div class="h-40 bg-gradient-to-r from-yellow-500 to-yellow-700 rounded-lg flex items-center justify-center mb-4">
-                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="white" stroke-width="2"/>
-                            <path d="M8 12H16" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M12 8V16" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 text-white">Breaker Blocks</h3>
-                    <p class="text-gray-400 mb-4">Anticipez les zones où le marché peut inverser sa tendance.</p>
-                    <a href="#breaker-blocks" class="text-primary font-medium hover:text-primary/80 transition flex items-center">
-                        Voir le cours <i class="fas fa-arrow-right ml-2 text-sm"></i>
-                    </a>
-                </div>
-                
-                <!-- Judas Swing -->
-                <div class="card-glass p-6 rounded-xl hover-scale fade-in delay-3">
-                    <div class="h-40 bg-gradient-to-r from-pink-500 to-pink-700 rounded-lg flex items-center justify-center mb-4">
-                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 3V21" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M3 12H21" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M18 6L6 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M18 18L6 6" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="white" stroke-width="2"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 text-white">Retournement</h3>
-                    <p class="text-gray-400 mb-4">Reconnaissez les faux mouvements du marché avant les grands retournements.</p>
-                    <a href="#judas-swing" class="text-primary font-medium hover:text-primary/80 transition flex items-center">
-                        Voir le cours <i class="fas fa-arrow-right ml-2 text-sm"></i>
-                    </a>
+                    <h3 class="text-xl font-bold mb-2 text-white">Analyse de Marché</h3>
+                    <p class="text-gray-400">Actualités économiques et analyses techniques pour les paires majeures.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Market Structure Course Detail -->
-    <section id="market-structure" class="py-16 bg-gray-900/50">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="card-glass rounded-xl shadow-sm p-8">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-2xl font-bold text-white">Market Structure</h2>
-                    <a href="#courses" class="text-sm text-primary hover:text-primary/80 transition flex items-center">
-                        <i class="fas fa-arrow-left mr-2"></i> Retour aux cours
-                    </a>
-                </div>
-                
-                <div class="prose prose-invert max-w-none">
-                    <h3 class="text-xl font-semibold mb-4 text-white">Comprendre la Structure du Marché</h3>
-                    <p class="mb-6">La structure du marché représente l'évolution des prix dans le temps et permet d'identifier les tendances, les consolidations et les points d'inversion potentiels.</p>
-                    
-                    <div class="bg-gray-800 p-4 rounded-lg mb-8">
-                        <h4 class="font-medium mb-3 text-primary">Points Clés :</h4>
-                        <ul class="space-y-2">
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mr-2 mt-1"></i>
-                                <span>Les plus hauts plus hauts (HH) et plus bas plus hauts (HL) indiquent une tendance haussière</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mr-2 mt-1"></i>
-                                <span>Les plus bas plus bas (LL) et plus hauts plus bas (LH) indiquent une tendance baissière</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mr-2 mt-1"></i>
-                                <span>Les breaks de structure (BOS) confirment la continuation de la tendance</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-primary mr-2 mt-1"></i>
-                                <span>Les changements de structure (CHoCH) signalent des inversions potentielles</span>
-                            </li>
-                        </ul>
-                    </div>
-                    
-                    <!-- Market Structure Animation -->
-                    <div class="concept-animation mb-8">
-                        <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none">
-                            <!-- Axes -->
-                            <line x1="50" y1="30" x2="50" y2="170" stroke="#4b5563" stroke-width="1.5"/>
-                            <line x1="50" y1="170" x2="450" y2="170" stroke="#4b5563" stroke-width="1.5"/>
-                            
-                            <!-- Price Action -->
-                            <path class="price-action-line" d="M70,150 C120,50 170,180 220,100 C270,150 320,80 370,130 C420,60 450,140" 
-                                  stroke="#3b82f6" stroke-width="2" fill="none"/>
-                            
-                            <!-- Market Structure Points -->
-                            <circle cx="70" cy="150" r="4" fill="#10b981"/>
-                            <circle cx="120" cy="50" r="4" fill="#10b981"/>
-                            <circle cx="170" cy="180" r="4" fill="#ef4444"/>
-                            <circle cx="220" cy="100" r="4" fill="#10b981"/>
-                            <circle cx="270" cy="150" r="4" fill="#10b981"/>
-                            <circle cx="320" cy="80" r="4" fill="#ef4444"/>
-                            <circle cx="370" cy="130" r="4" fill="#10b981"/>
-                            <circle cx="420" cy="60" r="4" fill="#ef4444"/>
-                            <circle cx="450" cy="140" r="4" fill="#10b981"/>
-                            
-                            <!-- Labels -->
-                            <text x="70" y="190" fill="#9ca3af" font-size="10" text-anchor="middle">HH</text>
-                            <text x="120" y="30" fill="#9ca3af" font-size="10" text-anchor="middle">LH</text>
-                            <text x="170" y="190" fill="#9ca3af" font-size="10" text-anchor="middle">LL</text>
-                            <text x="220" y="70" fill="#9ca3af" font-size="10" text-anchor="middle">HL</text>
-                            <text x="270" y="190" fill="#9ca3af" font-size="10" text-anchor="middle">HH</text>
-                            <text x="320" y="50" fill="#9ca3af" font-size="10" text-anchor="middle">LH</text>
-                            <text x="370" y="190" fill="#9ca3af" font-size="10" text-anchor="middle">HL</text>
-                            <text x="420" y="30" fill="#9ca3af" font-size="10" text-anchor="middle">LL</text>
-                            <text x="450" y="190" fill="#9ca3af" font-size="10" text-anchor="middle">BOS</text>
-                        </svg>
-                    </div>
-                    
-                    <h3 class="text-xl font-semibold mb-4 mt-8 text-white">Application Pratique</h3>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="bg-gray-800 p-4 rounded-lg border-l-4 border-primary">
-                            <h4 class="font-medium text-white mb-2">Tendance Haussière</h4>
-                            <p class="text-sm text-gray-300">Une série de HH et HL confirme la tendance haussière. Les entrées se prennent sur les retracements vers les HL avec confirmation.</p>
-                        </div>
-                        <div class="bg-gray-800 p-4 rounded-lg border-l-4 border-red-500">
-                            <h4 class="font-medium text-white mb-2">Tendance Baissière</h4>
-                            <p class="text-sm text-gray-300">Une série de LL et LH confirme la tendance baissière. Les entrées se prennent sur les retracements vers les LH avec confirmation.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-8 bg-blue-900/20 p-4 rounded-lg border border-blue-900/50">
-                        <h4 class="font-medium text-blue-400 mb-2">Conseil Astral :</h4>
-                        <p class="text-sm">"Toujours trader dans le sens de la structure du marché. Les contre-tendances doivent être réservées aux traders expérimentés avec des stops serrés."</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Position Calculator -->
-    <section id="calculator" class="py-16">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12 slide-up">
-                <h2 class="text-3xl font-bold text-white mb-4">Calculateur de Lot</h2>
-                <p class="text-lg text-gray-400 max-w-3xl mx-auto">Optimisez votre gestion de risque avec notre calculateur intelligent.</p>
-            </div>
-            
-            <div class="card-glass rounded-xl shadow-sm p-8 slide-up delay-1">
-                <div class="grid md:grid-cols-2 gap-8">
-                    <div>
-                        <div class="mb-6">
-                            <label for="account-currency" class="block text-sm font-medium text-gray-300 mb-2">Devise du Compte</label>
-                            <select id="account-currency" class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-primary focus:border-primary text-white">
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
-                                <option value="GBP">GBP</option>
-                                <option value="JPY">JPY</option>
-                            </select>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label for="account-balance" class="block text-sm font-medium text-gray-300 mb-2">Solde du Compte</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span class="text-gray-400">$</span>
-                                </div>
-                                <input type="number" id="account-balance" class="w-full pl-8 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-primary focus:border-primary text-white" placeholder="1000">
-                            </div>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label for="risk-percent" class="block text-sm font-medium text-gray-300 mb-2">Pourcentage de Risque (%)</label>
-                            <div class="flex items-center">
-                                <input type="range" id="risk-percent" min="0.5" max="5" step="0.5" value="1" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                                <span id="risk-percent-value" class="ml-4 text-white w-12 text-center">1%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <div class="mb-6">
-                            <label for="pair-type" class="block text-sm font-medium text-gray-300 mb-2">Type de Paire</label>
-                            <select id="pair-type" class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-primary focus:border-primary text-white">
-                                <option value="standard">Standard (EURUSD, GBPUSD)</option>
-                                <option value="jpy">JPY (USDJPY, EURJPY)</option>
-                                <option value="gold">XAUUSD (Or)</option>
-                                <option value="crypto">Cryptomonnaies</option>
-                                <option value="indices">Indices (US30, NAS100)</option>
-                            </select>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label for="stop-loss" class="block text-sm font-medium text-gray-300 mb-2">Stop Loss (Pips)</label>
-                            <input type="number" id="stop-loss" class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-primary focus:border-primary text-white" placeholder="20">
-                        </div>
-                    </div>
-                </div>
-                
-                <button id="calculate-btn" class="w-full bg-primary hover:bg-primary/90 text-white py-4 rounded-lg font-medium transition flex items-center justify-center">
-                    <i class="fas fa-calculator mr-2"></i> Calculer la Taille de Position
-                </button>
-                
-                <div class="mt-8 bg-gray-800 p-6 rounded-lg border border-gray-700">
-                    <h3 class="text-lg font-medium mb-4 text-white">Résultats</h3>
-                    <div class="grid md:grid-cols-3 gap-4">
-                        <div class="bg-gray-900 p-4 rounded-lg">
-                            <span class="block text-sm text-gray-400 mb-1">Montant à Risquer</span>
-                            <span class="text-xl font-bold text-white" id="risk-amount">$10.00</span>
-                        </div>
-                        <div class="bg-gray-900 p-4 rounded-lg">
-                            <span class="block text-sm text-gray-400 mb-1">Valeur du Pip</span>
-                            <span class="text-xl font-bold text-white" id="pip-value">$1.00</span>
-                        </div>
-                        <div class="bg-primary/10 p-4 rounded-lg border border-primary/20">
-                            <span class="block text-sm text-primary mb-1">Taille de Position</span>
-                            <span class="text-xl font-bold text-white" id="position-size">0.50</span>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-6 bg-blue-900/20 p-4 rounded-lg border border-blue-900/50">
-                        <h4 class="font-medium text-blue-400 mb-2">Conseil Astral :</h4>
-                        <p class="text-sm text-gray-300">Ne risquez jamais plus de 1-2% de votre capital par trade. Ajustez votre stop loss selon la volatilité du marché et la structure des prix.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Trading Journal -->
-    <section id="journal" class="py-16 bg-gray-900/50">
+    <!-- Pricing Section -->
+    <section id="pricing" class="relative overflow-hidden py-20 md:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12 slide-up">
-                <h2 class="text-3xl font-bold text-white mb-4">Journal de Trading</h2>
-                <p class="text-lg text-gray-400 max-w-3xl mx-auto">Analysez vos performances et améliorez votre stratégie.</p>
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-white mb-4">Choisissez Votre Formule</h2>
+                <p class="text-lg text-gray-400 max-w-3xl mx-auto">Sélectionnez l'abonnement qui correspond à votre niveau.</p>
             </div>
             
-            <div class="card-glass rounded-xl shadow-sm p-8 slide-up delay-1">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                    <div>
-                        <h3 class="text-xl font-bold text-white">Vos Statistiques</h3>
-                        <p class="text-gray-400">Synthèse de votre activité trading</p>
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="card-hover p-8 rounded-xl border border-gray-700">
+                    <h3 class="text-xl font-bold mb-2 text-white">Découverte</h3>
+                    <p class="text-gray-400 mb-4">Pour débutants</p>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold text-white">Gratuit</span>
                     </div>
-                    <button class="mt-4 md:mt-0 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center">
-                        <i class="fas fa-sync-alt mr-2"></i> Synchroniser MT4/MT5
-                    </button>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span class="text-gray-300">Ressources éducatives</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span class="text-gray-300">Actualités quotidiennes</span>
+                        </li>
+                        <li class="flex items-center text-gray-500">
+                            <i class="fas fa-times text-gray-600 mr-2"></i>
+                            <span>Pas de signaux</span>
+                        </li>
+                        <li class="flex items-center text-gray-500">
+                            <i class="fas fa-times text-gray-600 mr-2"></i>
+                            <span>Pas de mentorat</span>
+                        </li>
+                    </ul>
+                    <a href="#" class="block w-full bg-gray-700 hover:bg-gray-600 text-white text-center py-3 rounded-lg font-medium transition">Commencer</a>
                 </div>
                 
-                <div class="grid md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                        <span class="block text-sm text-gray-400 mb-1">Capital Actuel</span>
-                        <span class="text-2xl font-bold text-white">$12,450.75</span>
+                <div class="card-hover p-8 rounded-xl border-2 border-indigo-500 transform scale-105 relative">
+                    <div class="absolute top-0 right-0 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">POPULAIRE</div>
+                    <h3 class="text-xl font-bold mb-2 text-white">Standard</h3>
+                    <p class="text-gray-400 mb-4">Pour traders sérieux</p>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold text-white">€25</span>
+                        <span class="text-gray-400">/mois</span>
                     </div>
-                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                        <span class="block text-sm text-gray-400 mb-1">Objectif Mensuel</span>
-                        <span class="text-2xl font-bold text-white">$15,000.00</span>
-                    </div>
-                    <div class="bg-gray-800 p-4 rounded-lg border border-green-500/20">
-                        <span class="block text-sm text-green-400 mb-1">Trades Gagnants</span>
-                        <span class="text-2xl font-bold text-white">74</span>
-                    </div>
-                    <div class="bg-gray-800 p-4 rounded-lg border border-red-500/20">
-                        <span class="block text-sm text-red-400 mb-1">Trades Perdants</span>
-                        <span class="text-2xl font-bold text-white">26</span>
-                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span class="text-gray-300">Accès complet aux signaux (3-5/jour)</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span class="text-gray-300">Cours pour débutants</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span class="text-gray-300">Analyses de marché</span>
+                        </li>
+                        <li class="flex items-center text-gray-500">
+                            <i class="fas fa-times text-gray-600 mr-2"></i>
+                            <span>Mentorat limité</span>
+                        </li>
+                    </ul>
+                    <a href="#" class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center py-3 rounded-lg font-medium transition">S'abonner</a>
                 </div>
                 
-                <div class="grid md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                        <span class="block text-sm text-gray-400 mb-1">Ratio Gain/Pertes</span>
-                        <span class="text-2xl font-bold text-white">2.8:1</span>
+                <div class="card-hover p-8 rounded-xl border border-gray-700">
+                    <h3 class="text-xl font-bold mb-2 text-white">VIP</h3>
+                    <p class="text-gray-400 mb-4">Pour traders experts</p>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold text-white">€100</span>
+                        <span class="text-gray-400">une fois</span>
                     </div>
-                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                        <span class="block text-sm text-gray-400 mb-1">Taux de Réussite</span>
-                        <span class="text-2xl font-bold text-white">74%</span>
-                    </div>
-                    <div class="bg-gray-800 p-4 rounded-lg border border-primary/20">
-                        <span class="block text-sm text-primary mb-1">Rendement Mensuel</span>
-                        <span class="text-2xl font-bold text-white">+12.4%</span>
-                    </div>
-                </div>
-                
-                <div class="mb-8">
-                    <div class="h-80">
-                        <canvas id="equityChart"></canvas>
-                    </div>
-                </div>
-                
-                <div>
-                    <h3 class="text-xl font-bold text-white mb-4">Historique des Trades</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-700">
-                            <thead>
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Symbole</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Taille</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Entrée</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Sortie</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">P&L</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">%</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-800">
-                                <tr>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">15/06/2023</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-white">EURUSD</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">Achat</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">1.50</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">1.0925</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">1.0975</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-green-400">+$75.00</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-green-400">+0.6%</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">14/06/2023</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-white">XAUUSD</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">Vente</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">0.30</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">1942.50</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">1935.75</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-green-400">+$202.50</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-green-400">+1.7%</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">13/06/2023</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-white">US30</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">Achat</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">0.50</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">34250</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">34120</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-red-400">-$65.00</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-red-400">-0.5%</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">12/06/2023</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-white">GBPUSD</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">Vente</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">1.00</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">1.2620</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">1.2585</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-green-400">+$35.00</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-green-400">+0.3%</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">11/06/2023</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-white">BTCUSD</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">Achat</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">0.10</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">30250</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">30480</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-green-400">+$23.00</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-green-400">+0.2%</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span class="text-gray-300">Accès à vie</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span class="text-gray-300">Outils avancés</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span class="text-gray-300">Mentorat personnel</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span class="text-gray-300">Support prioritaire</span>
+                        </li>
+                    </ul>
+                    <a href="#" class="block w-full bg-gray-800 hover:bg-gray-700 text-white text-center py-3 rounded-lg font-medium transition">Devenir VIP</a>
                 </div>
             </div>
         </div>
     </section>
-
     <!-- CTA Section -->
     <section class="py-16 bg-gradient-to-r from-primary to-blue-600">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

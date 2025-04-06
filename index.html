@@ -269,9 +269,9 @@
                         <a href="pages\cours.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Cours</a>
                         <a href="pages\bot.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mes Bots</a>
                         <a href="pages\journal.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
-                        
-                        <!-- Bouton de connexion / déconnexion -->
-                        <button id="loginButton" onclick="loginWithGitHub()" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Se connecter</button>
+
+                        <!-- Bouton de connexion -->
+                        <button id="loginButton" onclick="loginWithGitHub()">Se connecter avec GitHub</button>
 
                         <!-- Bulle pour afficher la première lettre du prénom -->
                         <div class="user-bubble" id="userBubble" style="display:none;">
@@ -279,24 +279,19 @@
                         </div>
 
                         <!-- Message "Connecté" -->
-                        <div class="user-status" id="userStatus" style="display:none;">Connecté</div>
+                        <div class="user-status" id="userStatus" style="display:none;">
+                            Connecté
+                        </div>
 
-                        <button onclick="logout()" id="logoutButton" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium" style="display:none;">Se déconnecter</button>
+                        <!-- Bouton de déconnexion -->
+                        <button onclick="logout()" id="logoutButton" style="display:none; position: fixed; top: 100px; right: 20px;">Se déconnecter</button>
                     </div>
-                </div>
-
-                <!-- Mobile Menu Button -->
-                <div class="-mr-2 flex md:hidden">
-                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none menu-btn" aria-controls="mobile-menu" aria-expanded="false">
-                        <span class="sr-only">Menu</span>
-                        <i class="fas fa-bars"></i>
-                    </button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Script Auth0 -->
+    <!-- Auth0 SDK -->
     <script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa.min.js"></script>
     <script>
         let auth0Client;
@@ -308,8 +303,8 @@
         // Initialise Auth0
         async function initAuth0() {
             auth0Client = await createAuth0Client({
-                domain: 'dev-60wpvyfxg2lmybw3.eu.auth0.com',
-                client_id: 'u16FFriuYcvxzD90x3zs6v7TyuxdvirX',
+                domain: 'dev-60wpvyfxg2lmybw3.eu.auth0.com', // Ton domain Auth0
+                client_id: 'u16FFriuYcvxzD90x3zs6v7TyuxdvirX', // Ton client_id Auth0
             });
 
             const user = await auth0Client.getUser();
@@ -324,11 +319,15 @@
             }
         }
 
-        // Se connecter avec GitHub
+        // Se connecter avec GitHub (Auth0 redirection)
         async function loginWithGitHub() {
-            await auth0Client.loginWithRedirect({
-                redirect_uri: window.location.origin
-            });
+            try {
+                await auth0Client.loginWithRedirect({
+                    redirect_uri: window.location.origin // La redirection après la connexion
+                });
+            } catch (error) {
+                console.error("Erreur de connexion : ", error);
+            }
         }
 
         // Afficher la bulle avec la première lettre du prénom
@@ -336,8 +335,8 @@
             const firstName = user.given_name || "Utilisateur";
             const firstLetter = firstName.charAt(0).toUpperCase();
             userBubble.textContent = firstLetter;
-            userBubble.style.display = 'block';
-            userStatus.style.display = 'block';
+            userBubble.style.display = 'block'; // Afficher la bulle
+            userStatus.style.display = 'block'; // Afficher le message "Connecté"
             userStatus.textContent = `Connecté en tant que ${firstName}`;
         }
 
@@ -352,7 +351,7 @@
             logoutButton.style.display = 'none';
         }
 
-        // Appeler l'initialisation d'Auth0
+        // Appeler l'initialisation d'Auth0 au chargement de la page
         initAuth0();
     </script>
     <!-- Mobile Menu -->

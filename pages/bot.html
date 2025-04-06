@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Bots - Astral Trading</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #3b82f6;
+            --dark: #0f0f0f;
+            --darker: #080808;
+            --light: #f8fafc;
+            --gray: #1e1e1e;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--darker);
+            color: var(--light);
+        }
+        
+        .card-glass {
+            background: rgba(15, 15, 15, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .hover-scale {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .highlight {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid #3b82f6;
+        }
+        
+        /* Syntax highlighting for code */
+        .code-block {
+            font-family: 'Courier New', monospace;
+            background-color: #1a1a1a;
+            color: #e1e1e1;
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .code-keyword { color: #f472b6; }
+        .code-string { color: #84cc16; }
+        .code-number { color: #f59e0b; }
+        .code-comment { color: #64748b; font-style: italic; }
+        .code-function { color: #38bdf8; }
+    </style>
+</head>
+<body class="bg-darker text-light min-h-screen">
+  <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-xl font-bold text-white">Astral<span class="text-primary"> Trading</span></span>
+                    </div>
+                </div>
+                
+                <!-- Menu Principal (visible sur les grands écrans) -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-center space-x-8">
+                        <a href="../index.html" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Retour à l'accueil</a>
+                    </div>
+                </div>
+                
+                <!-- Mobile Menu Button (visible uniquement sur mobile) -->
+                <div class="md:hidden flex items-center ml-4">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-700 focus:outline-none" id="mobile-menu-button">
+                        <span class="sr-only">Menu</span>
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu (hidden by default) -->
+    <div class="md:hidden" id="mobile-menu" style="display: none;">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <a href="../index.html" class="text-gray-300 hover:text-white block px-3 py-2 text-base font-medium">Retour à l'accueil</a>
+        </div>
+    </div>
+
+    <!-- Script to toggle mobile menu -->
+    <script>
+        document.getElementById("mobile-menu-button").addEventListener("click", function() {
+            var menu = document.getElementById("mobile-menu");
+            if (menu.style.display === "none" || menu.style.display === "") {
+                menu.style.display = "block";
+            } else {
+                menu.style.display = "none";
+            }
+        });
+    </script>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // Icônes Lucide
+        lucide.createIcons();
+        
+        // Données de démonstration
+        const demoBots = [
+            {
+                id: 1,
+                name: "Scalper EUR/USD",
+                strategy: "Scalping 5min",
+                status: "active",
+                pnl: 1245.32,
+                winRate: 68.5,
+                account: "MT5-78452",
+                platform: "metatrader",
+                lastActive: "2023-06-15T14:30:00",
+                code: `// Scalping strategy for EUR/USD 5min
+function checkSignal() {
+    const rsi = indicators.rsi(14);
+    const ema20 = indicators.ema(20);
+    const ema50 = indicators.ema(50);
+    
+    if (ema20 > ema50 && rsi < 30) {
+        return 'buy';
+    } else if (ema20 < ema50 && rsi > 70) {
+        return 'sell';
+    }
+    return null;
+}`,
+                performanceData: Array.from({length: 30}, (_, i) => 1000 + Math.sin(i/2) * 200 + i * 40)
+            },
+            {
+                id: 2,
+                name: "Swing BTC/USDT",
+                strategy: "Swing Trading",
+                status: "paused",
+                pnl: 320.15,
+                winRate: 72.3,
+                account: "Binance-User1",
+                platform: "binance",
+                lastActive: "2023-06-14T18:45:00",
+                code: `// Swing trading strategy for BTC/USDT
+const config = {
+    takeProfit: 0.05, // 5%
+    stopLoss: 0.02,   // 2%
+    positionSize: 0.1 // 10% of capital
+};
+
+function executeStrategy() {
+    const macd = indicators.macd(12, 26, 9);
+    const volume = indicators.volume();
+    
+    if (macd.histogram > 0 && volume > volume.ma(20)) {
+        enterLong(config.positionSize, config.stopLoss, config.takeProfit);
+    }
+}`,
+                performanceData: Array.from({length: 30}, (_, i) => 1000 + Math.sin(i/3) * 150 + i * 30)
+            },
+            {
+                id: 3,
+                name: "Arbitrage ETH",
+                strategy: "Market Making",
+                status: "error",
+                pnl: -150.75,
+                winRate: 45.2,
+                account: "FTX-Pro",
+                platform: "ftx",
+                lastActive: "2023-06-10T09:15:00",
+                error: "API connection timeout",
+                code: `// Market making strategy for ETH/USD
+const spread = 0.002; // 0.2% spread
+const minSize = 0.1;  // Minimum order size
+
+function updateOrders() {
+    const bestBid = market.bestBid();
+    const bestAsk = market.bestAsk();
+    
+    if (!bestBid || !bestAsk) {
+        logError("Market data unavailable");
+        return;
+    }
+    
+    const myBid = bestBid.price * (1 - spread/2);
+    const myAsk = bestAsk.price * (1 + spread/2);
+    
+    placeOrder('buy', myBid, minSize);
+    placeOrder('sell', myAsk, minSize);
+}`,
+                performanceData: Array.from({length: 30}, (_, i) => 1000 - Math.sin(i/1.5) * 300 + i * 10)
+            }
+        ];
+        
+        const platformIcons = {
+            metatrader: <i className="fas fa-chart-line text-blue-400"></i>,
+            binance: <i className="fas fa-coins text-yellow-400"></i>,
+            ftx: <i className="fas fa-exchange-alt text-purple-400"></i>
+        };
+        
+        // Composant MiniGraph
+        function MiniGraph({ data }) {
+            const chartRef = React.useRef(null);
+            const [chart, setChart] = React.useState(null);
+            
+            React.useEffect(() => {
+                if (chartRef.current && !chart) {
+                    const ctx = chartRef.current.getContext('2d');
+                    const newChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: Array.from({length: data.length}, (_, i) => ''),
+                            datasets: [{
+                                data: data,
+                                borderColor: data[data.length-1] >= data[0] ? '#10b981' : '#ef4444',
+                                backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                x: { display: false },
+                                y: { display: false }
+                            }
+                        }
+                    });
+                    setChart(newChart);
+                }
+                
+                return () => {
+                    if (chart) {
+                        chart.destroy();
+                    }
+                };
+            }, [data, chart]);
+            
+            return <canvas ref={chartRef} className="w-full h-12" />;
+        }
+        
+        // Composant StatusBadge
+        function StatusBadge({ status, error }) {
+            const statusClasses = {
+                active: 'bg-green-500/20 text-green-400',
+                paused: 'bg-yellow-500/20 text-yellow-400',
+                error: 'bg-red-500/20 text-red-400'
+            };
+            
+            const statusIcons = {
+                active: <i className="fas fa-circle-play mr-1"></i>,
+                paused: <i className="fas fa-pause mr-1"></i>,
+                error: <i className="fas fa-circle-exclamation mr-1"></i>
+            };
+            
+            return (
+                <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClasses[status]}`}>
+                    {statusIcons[status]}
+                    {status === 'error' ? error : status}
+                </div>
+            );
+        }
+        
+        // Composant BotCard
+        function BotCard({ bot, onEdit, onDelete, onViewCode }) {
+            return (
+                <div className="card-glass rounded-xl p-4 hover-scale transition-all duration-300 fade-in">
+                    <div className="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 className="text-lg font-semibold text-white">{bot.name}</h3>
+                            <p className="text-sm text-gray-400">{bot.strategy}</p>
+                        </div>
+                        <StatusBadge status={bot.status} error={bot.error} />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <p className="text-xs text-gray-400">PNL</p>
+                            <p className={`text-lg font-medium ${bot.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                {bot.pnl >= 0 ? '+' : ''}{bot.pnl.toFixed(2)} $
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-400">Win Rate</p>
+                            <p className="text-lg font-medium text-blue-400">{bot.winRate}%</p>
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-sm mb-3">
+                        <div className="flex items-center">
+                            {platformIcons[bot.platform]}
+                            <span className="ml-2 text-gray-300">{bot.account}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                            Last active: {new Date(bot.lastActive).toLocaleString()}
+                        </span>
+                    </div>
+                    
+                    <div className="h-12 mb-3">
+                        <MiniGraph data={bot.performanceData} />
+                    </div>
+                    
+                    <div className="flex space-x-2">
+                        <button 
+                            onClick={() => onViewCode(bot)}
+                            className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded-md text-sm flex items-center justify-center"
+                        >
+                            <i className="fas fa-code mr-2"></i> Code
+                        </button>
+                        <button 
+                            onClick={() => onEdit(bot)}
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded-md text-sm flex items-center justify-center"
+                        >
+                            <i className="fas fa-edit mr-2"></i> Edit
+                        </button>
+                        <button 
+                            onClick={() => onDelete(bot.id)}
+                            className="flex-1 bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded-md text-sm flex items-center justify-center"
+                        >
+                            <i className="fas fa-trash mr-2"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+        
+        // Composant CodeViewer
+        function CodeViewer({ code, onClose }) {
+            // Simple syntax highlighting (basic implementation)
+            const highlightCode = (code) => {
+                const keywords = ['function', 'const', 'let', 'var', 'if', 'else', 'return', 'null'];
+                const functions = ['indicators', 'enterLong', 'placeOrder', 'logError'];
+                
+                return code.split('\n').map((line, i) => {
+                    // Highlight comments
+                    if (line.trim().startsWith('//')) {
+                        return `<span class="code-comment">${line}</span>`;
+                    }
+                    
+                    // Highlight strings
+                    let highlighted = line.replace(/".*?"|'.*?'/g, match => 
+                        `<span class="code-string">${match}</span>`
+                    );
+                    
+                    // Highlight numbers
+                    highlighted = highlighted.replace(/\b\d+\.?\d*\b/g, match => 
+                        `<span class="code-number">${match}</span>`
+                    );
+                    
+                    // Highlight keywords
+                    keywords.forEach(kw => {
+                        highlighted = highlighted.replace(new RegExp(`\\b${kw}\\b`, 'g'), 
+                            `<span class="code-keyword">${kw}</span>`
+                        );
+                    });
+                    
+                    // Highlight functions
+                    functions.forEach(fn => {
+                        highlighted = highlighted.replace(new RegExp(`\\b${fn}\\b`, 'g'), 
+                            `<span class="code-function">${fn}</span>`
+                        );
+                    });
+                    
+                    return highlighted;
+                }).join('<br/>');
+            };
+            
+            return (
+                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+                    <div className="bg-gray-900 rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+                        <div className="flex justify-between items-center p-4 border-b border-gray-800">
+                            <h3 className="text-lg font-semibold">Bot Script</h3>
+                            <button 
+                                onClick={onClose}
+                                className="text-gray-400 hover:text-white"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div className="overflow-auto p-4 flex-1">
+                            <pre className="code-block" dangerouslySetInnerHTML={{ __html: highlightCode(code) }} />
+                        </div>
+                        <div className="p-4 border-t border-gray-800 flex justify-end">
+                            <button 
+                                onClick={onClose}
+                                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        // Composant BotForm
+        function BotForm({ bot, onSave, onCancel }) {
+            const [formData, setFormData] = useState(bot || {
+                name: '',
+                strategy: '',
+                status: 'active',
+                account: '',
+                platform: 'metatrader',
+                code: ''
+            });
+            
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+            };
+            
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onSave(formData);
+            };
+            
+            return (
+                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+                    <div className="bg-gray-900 rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+                        <div className="flex justify-between items-center p-4 border-b border-gray-800">
+                            <h3 className="text-lg font-semibold">
+                                {bot ? 'Edit Bot' : 'Add New Bot'}
+                            </h3>
+                            <button 
+                                onClick={onCancel}
+                                className="text-gray-400 hover:text-white"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <form onSubmit={handleSubmit} className="overflow-auto p-4 flex-1 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Bot Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Strategy</label>
+                                <input
+                                    type="text"
+                                    name="strategy"
+                                    value={formData.strategy}
+                                    onChange={handleChange}
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required
+                                />
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Status</label>
+                                    <select
+                                        name="status"
+                                        value={formData.status}
+                                        onChange={handleChange}
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="active">Active</option>
+                                        <option value="paused">Paused</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Platform</label>
+                                    <select
+                                        name="platform"
+                                        value={formData.platform}
+                                        onChange={handleChange}
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="metatrader">MetaTrader</option>
+                                        <option value="binance">Binance</option>
+                                        <option value="ftx">FTX</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Account</label>
+                                <input
+                                    type="text"
+                                    name="account"
+                                    value={formData.account}
+                                    onChange={handleChange}
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Trading Script</label>
+                                <textarea
+                                    name="code"
+                                    value={formData.code}
+                                    onChange={handleChange}
+                                    rows="10"
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required
+                                />
+                            </div>
+                        </form>
+                        <div className="p-4 border-t border-gray-800 flex justify-end space-x-3">
+                            <button 
+                                onClick={onCancel}
+                                className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                type="submit"
+                                onClick={handleSubmit}
+                                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md"
+                            >
+                                Save Bot
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        // Composant principal BotManager
+        function BotManager() {
+            const [bots, setBots] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [viewingCode, setViewingCode] = useState(null);
+            const [editingBot, setEditingBot] = useState(null);
+            const [showForm, setShowForm] = useState(false);
+            
+            // Load demo data on mount
+            useEffect(() => {
+                setTimeout(() => {
+                    setBots(demoBots);
+                    setLoading(false);
+                }, 800);
+            }, []);
+            
+            const handleAddBot = () => {
+                setEditingBot(null);
+                setShowForm(true);
+            };
+            
+            const handleEditBot = (bot) => {
+                setEditingBot(bot);
+                setShowForm(true);
+            };
+            
+            const handleDeleteBot = (id) => {
+                if (window.confirm('Are you sure you want to delete this bot?')) {
+                    setBots(prev => prev.filter(bot => bot.id !== id));
+                }
+            };
+            
+            const handleViewCode = (bot) => {
+                setViewingCode(bot.code);
+            };
+            
+            const handleSaveBot = (botData) => {
+                if (editingBot) {
+                    // Update existing bot
+                    setBots(prev => prev.map(bot => 
+                        bot.id === editingBot.id ? { ...bot, ...botData } : bot
+                    ));
+                } else {
+                    // Add new bot
+                    const newBot = {
+                        ...botData,
+                        id: Math.max(...bots.map(b => b.id), 0) + 1,
+                        pnl: 0,
+                        winRate: 0,
+                        lastActive: new Date().toISOString(),
+                        performanceData: Array.from({length: 30}, (_, i) => 1000 + Math.random() * 200)
+                    };
+                    setBots(prev => [...prev, newBot]);
+                }
+                setShowForm(false);
+            };
+            
+            return (
+                <div className="container mx-auto px-4 py-8">
+                    <div className="flex justify-between items-center mb-8">
+                        <h1 className="text-3xl font-bold text-white">
+                            <i className="fas fa-robot text-blue-400 mr-3"></i>
+                            Bot Manager
+                        </h1>
+                        <button 
+                            onClick={handleAddBot}
+                            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md flex items-center"
+                        >
+                            <i className="fas fa-plus mr-2"></i> Add Bot
+                        </button>
+                    </div>
+                    
+                    {loading ? (
+                        <div className="flex justify-center items-center h-64">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                        </div>
+                    ) : bots.length === 0 ? (
+                        <div className="text-center py-12">
+                            <i className="fas fa-robot text-5xl text-gray-600 mb-4"></i>
+                            <h3 className="text-xl font-medium text-gray-300">No trading bots configured</h3>
+                            <p className="text-gray-500 mt-2">Add your first bot to get started</p>
+                            <button 
+                                onClick={handleAddBot}
+                                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md"
+                            >
+                                <i className="fas fa-plus mr-2"></i> Add Bot
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {bots.map(bot => (
+                                <BotCard 
+                                    key={bot.id}
+                                    bot={bot}
+                                    onEdit={handleEditBot}
+                                    onDelete={handleDeleteBot}
+                                    onViewCode={handleViewCode}
+                                />
+                            ))}
+                        </div>
+                    )}
+                    
+                    {viewingCode && (
+                        <CodeViewer 
+                            code={viewingCode}
+                            onClose={() => setViewingCode(null)}
+                        />
+                    )}
+                    
+                    {showForm && (
+                        <BotForm 
+                            bot={editingBot}
+                            onSave={handleSaveBot}
+                            onCancel={() => setShowForm(false)}
+                        />
+                    )}
+                </div>
+            );
+        }
+        
+        // Rendu de l'application
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<BotManager />);
+    </script>
+    
+</body>
+</html>

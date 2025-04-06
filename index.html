@@ -315,6 +315,14 @@
             netlifyIdentity.open('login');
         }
 
+        // Fonction pour gérer le succès de la connexion
+        netlifyIdentity.on('login', function(user) {
+            console.log("Utilisateur connecté après login:", user);
+            displayUserBubble(user); // Afficher la bulle avec la première lettre du prénom
+            document.getElementById('loginButton').style.display = 'none'; // Cacher le bouton de connexion
+            document.getElementById('logoutButton').style.display = 'block'; // Afficher le bouton de déconnexion
+        });
+
         // Afficher la bulle avec la première lettre du prénom
         function displayUserBubble(user) {
             const firstName = user.user_metadata ? user.user_metadata.full_name : "Utilisateur";
@@ -336,25 +344,6 @@
             document.getElementById('loginButton').style.display = 'block'; // Afficher le bouton de connexion
             document.getElementById('logoutButton').style.display = 'none'; // Cacher le bouton de déconnexion
         }
-    </script>
-    <!-- Mobile Menu -->
-    <div class="mobile-menu hidden md:hidden" id="mobile-menu">
-        <a href="#home" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Accueil</a>
-        <a href="pages\cours.html" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Cours</a>
-        <a href="pages\calculateur.html" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Calculateur</a>
-        <a href="pages\journal.html" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
-        <a href="pages\login.html" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm font-medium transition">Connexion</a>
-    </div>
-
-    <script>
-        // Mobile Menu Toggle
-        const menuBtn = document.querySelector('.menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        menuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('open');
-            menuBtn.classList.toggle('open');
-        });
     </script>
 
     <!-- Hero Section -->

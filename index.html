@@ -230,6 +230,22 @@
                         <a href="pages\bot.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mes Bots</a>
                         <a href="pages\journal.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
                         <a href="pages\login.html" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm font-medium transition">Connexion</a>
+                        <button onclick="startGitHubLogin()">Se connecter avec GitHub</button>
+                        <script>
+                        function startGitHubLogin() {
+                            const identity = window.netlifyIdentity;
+                            if (identity) {
+                            identity.open('login'); // ouvre le modal si activé
+                            } else {
+                            // Redirige vers GitHub direct si tu veux pas du tout de modal
+                            window.location.href = '/.netlify/identity/login/github';
+                            }
+                        }
+                        </script>
+
+                        <!-- Ajoute le script Netlify Identity si pas encore dans ta page -->
+                        <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
                     </div>
                 </div>
                 <!-- Mobile Menu Button -->

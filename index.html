@@ -271,7 +271,7 @@
                         <a href="pages\journal.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
                         
                         <!-- Bouton de connexion / déconnexion -->
-                        <button id="loginButton" onclick="loginWithGitHub()" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Se connecter avec GitHub</button>
+                        <button id="loginButton" onclick="loginWithGitHub()" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Se connecter</button>
 
                         <!-- Bulle pour afficher la première lettre du prénom -->
                         <div class="user-bubble" id="userBubble" style="display:none;">
@@ -308,8 +308,8 @@
         // Initialise Auth0
         async function initAuth0() {
             auth0Client = await createAuth0Client({
-                domain: 'YOUR_AUTH0_DOMAIN',
-                client_id: 'YOUR_AUTH0_CLIENT_ID',
+                domain: 'dev-60wpvyfxg2lmybw3.eu.auth0.com',
+                client_id: 'u16FFriuYcvxzD90x3zs6v7TyuxdvirX',
             });
 
             const user = await auth0Client.getUser();

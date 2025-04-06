@@ -209,6 +209,46 @@
         .menu-btn.open i {
             transform: rotate(90deg);
         }
+        /* Style de la bulle */
+        .user-bubble {
+        display: none; /* Cacher par défaut */
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        line-height: 40px;
+        font-size: 18px;
+        font-weight: bold;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        cursor: pointer;
+        }
+
+        /* Style de la bulle avec texte pour "Connecté" */
+        .user-bubble.logged-in {
+        display: block;
+        }
+
+        /* Style de la notification "Connecté" */
+        .user-status {
+        display: none; /* Cacher par défaut */
+        position: fixed;
+        top: 60px;
+        right: 20px;
+        background-color: #28a745;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        }
+        
+        .user-status.active {
+        display: block;
+        }
     </style>
 </head>
 <body class="gradient-bg">
@@ -229,25 +269,77 @@
                         <a href="pages\cours.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Cours</a>
                         <a href="pages\bot.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mes Bots</a>
                         <a href="pages\journal.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
-                        <a href="pages\login.html" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm font-medium transition">Connexion</a>
-                        <button onclick="startGitHubLogin()">Se connecter avec GitHub</button>
+                                                <!-- Bouton de connexion -->
+                        <button id="loginButton" onclick="loginWithGitHub()">Se connecter avec GitHub</button>
+
+                        <!-- Bulle pour afficher la première lettre du prénom -->
+                        <div class="user-bubble" id="userBubble">
+                            <!-- La lettre sera injectée ici -->
+                        </div>
+
+                        <!-- Message "Connecté" -->
+                        <div class="user-status" id="userStatus">Connecté</div>
+
+                        <button onclick="logout()" id="logoutButton" style="position: fixed; top: 100px; right: 20px;">Se déconnecter</button>
+
+                        <script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa.min.js"></script>
                         <script>
-                        function startGitHubLogin() {
-                            const identity = window.netlifyIdentity;
-                            if (identity) {
-                            identity.open('login'); // ouvre le modal si activé
+                            let auth0Client;
+                            const userBubble = document.getElementById('userBubble');
+                            const userStatus = document.getElementById('userStatus');
+                            const logoutButton = document.getElementById('logoutButton');
+                            const loginButton = document.getElementById('loginButton');
+
+                            // Initialise Auth0
+                            async function initAuth0() {
+                            auth0Client = await createAuth0Client({
+                                domain: 'YOUR_AUTH0_DOMAIN',
+                                client_id: 'YOUR_AUTH0_CLIENT_ID',
+                            });
+
+                            const user = await auth0Client.getUser();
+                            if (user) {
+                                displayUserBubble(user);
+                                loginButton.style.display = 'none'; // Cacher le bouton de connexion
+                                logoutButton.style.display = 'block'; // Afficher le bouton de déconnexion
                             } else {
-                            // Redirige vers GitHub direct si tu veux pas du tout de modal
-                            window.location.href = '/.netlify/identity/login/github';
+                                userBubble.style.display = 'none';
+                                loginButton.style.display = 'block'; // Afficher le bouton de connexion
+                                logoutButton.style.display = 'none'; // Cacher le bouton de déconnexion
                             }
-                        }
+                            }
+
+                            // Se connecter avec GitHub
+                            async function loginWithGitHub() {
+                            await auth0Client.loginWithRedirect({
+                                redirect_uri: window.location.origin
+                            });
+                            }
+
+                            // Afficher la bulle avec la première lettre du prénom
+                            function displayUserBubble(user) {
+                            const firstName = user.given_name || "Utilisateur";
+                            const firstLetter = firstName.charAt(0).toUpperCase();
+                            userBubble.textContent = firstLetter;
+                            userBubble.classList.add('logged-in');
+                            userStatus.classList.add('active');
+                            userStatus.textContent = `Connecté en tant que ${firstName}`;
+                            }
+
+                            // Gérer la déconnexion
+                            async function logout() {
+                            await auth0Client.logout({
+                                returnTo: window.location.origin
+                            });
+                            userBubble.classList.remove('logged-in');
+                            userStatus.classList.remove('active');
+                            loginButton.style.display = 'block';
+                            logoutButton.style.display = 'none';
+                            }
+
+                            // Appeler l'initialisation d'Auth0
+                            initAuth0();
                         </script>
-
-                        <!-- Ajoute le script Netlify Identity si pas encore dans ta page -->
-                        <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-
-                    </div>
-                </div>
                 <!-- Mobile Menu Button -->
                 <div class="-mr-2 flex md:hidden">
                     <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none menu-btn" aria-controls="mobile-menu" aria-expanded="false">

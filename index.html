@@ -291,49 +291,37 @@
         </div>
     </nav>
 
-    <!-- Auth0 SDK -->
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa.min.js"></script>
+    <!-- Script pour Netlify Identity -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
     <script>
-        let auth0Client;
-        const userBubble = document.getElementById('userBubble');
-        const userStatus = document.getElementById('userStatus');
-        const logoutButton = document.getElementById('logoutButton');
-        const loginButton = document.getElementById('loginButton');
-
-        // Initialise Auth0
-        async function initAuth0() {
-            auth0Client = await createAuth0Client({
-                domain: 'dev-60wpvyfxg2lmybw3.eu.auth0.com', // Ton domain Auth0
-                client_id: 'u16FFriuYcvxzD90x3zs6v7TyuxdvirX', // Ton client_id Auth0
-            });
-
-            const user = await auth0Client.getUser();
+        // Initialisation de Netlify Identity
+        netlifyIdentity.on('init', user => {
             if (user) {
+                console.log("Utilisateur connecté :", user);
                 displayUserBubble(user);
-                loginButton.style.display = 'none'; // Cacher le bouton de connexion
-                logoutButton.style.display = 'block'; // Afficher le bouton de déconnexion
+                document.getElementById('loginButton').style.display = 'none'; // Cacher le bouton de connexion
+                document.getElementById('logoutButton').style.display = 'block'; // Afficher le bouton de déconnexion
             } else {
-                userBubble.style.display = 'none';
-                loginButton.style.display = 'block'; // Afficher le bouton de connexion
-                logoutButton.style.display = 'none'; // Cacher le bouton de déconnexion
+                console.log("Utilisateur non connecté");
+                document.getElementById('userBubble').style.display = 'none'; // Cacher la bulle
+                document.getElementById('loginButton').style.display = 'block'; // Afficher le bouton de connexion
+                document.getElementById('logoutButton').style.display = 'none'; // Cacher le bouton de déconnexion
             }
-        }
+        });
 
-        // Se connecter avec GitHub (Auth0 redirection)
-        async function loginWithGitHub() {
-            try {
-                await auth0Client.loginWithRedirect({
-                    redirect_uri: window.location.origin // La redirection après la connexion
-                });
-            } catch (error) {
-                console.error("Erreur de connexion : ", error);
-            }
+        // Fonction pour ouvrir la fenêtre de connexion
+        function loginWithGitHub() {
+            netlifyIdentity.open('login');
         }
 
         // Afficher la bulle avec la première lettre du prénom
         function displayUserBubble(user) {
-            const firstName = user.given_name || "Utilisateur";
+            const firstName = user.user_metadata ? user.user_metadata.full_name : "Utilisateur";
             const firstLetter = firstName.charAt(0).toUpperCase();
+            const userBubble = document.getElementById('userBubble');
+            const userStatus = document.getElementById('userStatus');
+            
             userBubble.textContent = firstLetter;
             userBubble.style.display = 'block'; // Afficher la bulle
             userStatus.style.display = 'block'; // Afficher le message "Connecté"
@@ -341,18 +329,13 @@
         }
 
         // Gérer la déconnexion
-        async function logout() {
-            await auth0Client.logout({
-                returnTo: window.location.origin
-            });
-            userBubble.style.display = 'none';
-            userStatus.style.display = 'none';
-            loginButton.style.display = 'block';
-            logoutButton.style.display = 'none';
+        function logout() {
+            netlifyIdentity.logout();
+            document.getElementById('userBubble').style.display = 'none'; // Cacher la bulle
+            document.getElementById('userStatus').style.display = 'none'; // Cacher le message "Connecté"
+            document.getElementById('loginButton').style.display = 'block'; // Afficher le bouton de connexion
+            document.getElementById('logoutButton').style.display = 'none'; // Cacher le bouton de déconnexion
         }
-
-        // Appeler l'initialisation d'Auth0 au chargement de la page
-        initAuth0();
     </script>
     <!-- Mobile Menu -->
     <div class="mobile-menu hidden md:hidden" id="mobile-menu">

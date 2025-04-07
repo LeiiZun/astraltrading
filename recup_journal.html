@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AstralTrading - Journal de Trading</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --dark: #0f0f0f;
+            --darker: #080808;
+            --light: #f8fafc;
+            --gray: #1e1e1e;
+            --profit: #10b981;
+            --loss: #ef4444;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--darker);
+            color: var(--light);
+            min-height: 100vh;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--darker) 0%, var(--gray) 100%);
+        }
+        
+        .card-glass {
+            background: rgba(15, 15, 15, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .trade-profit {
+            color: var(--profit);
+            font-weight: 600;
+        }
+        
+        .trade-loss {
+            color: var(--loss);
+            font-weight: 600;
+        }
+        
+        .fc-daygrid-day-number, .fc-col-header-cell-cushion {
+            color: white !important;
+        }
+        
+        .fc-daygrid-day-frame {
+            background: rgba(30, 30, 30, 0.7) !important;
+        }
+        
+        .fc-day-today {
+            background: rgba(59, 130, 246, 0.2) !important;
+        }
+        
+        .fc-event {
+            cursor: pointer;
+            border: none !important;
+            font-size: 0.8rem;
+            padding: 2px 4px;
+        }
+        
+        .profit-event {
+            background-color: rgba(16, 185, 129, 0.3) !important;
+            color: var(--profit) !important;
+        }
+        
+        .loss-event {
+            background-color: rgba(239, 68, 68, 0.3) !important;
+            color: var(--loss) !important;
+        }
+        
+        .tab-active {
+            border-bottom: 2px solid var(--primary);
+            color: var(--primary) !important;
+        }
+        
+        .input-field {
+            transition: all 0.3s ease;
+            background: rgba(30, 30, 30, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .input-field:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .slide-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUp 0.8s ease-out forwards;
+        }
+        
+        @keyframes slideUp {
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+    </style>
+</head>
+<body class="gradient-bg">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-xl font-bold text-white">Astral<span class="text-primary"> Trading</span></span>
+                    </div>
+                </div>
+                <div class="hidden md:block ml-10">
+                    <div class="flex space-x-8">
+                        <a href="../index.html" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Retour à l'accueil</a>
+                        <a href="dashboard.html" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Dashboard</a>
+                        <a href="journal.html" class="text-primary px-3 py-2 text-sm font-medium border-b-2 border-primary">Journal</a>
+                    </div>
+                </div>
+                <!-- Mobile Menu Button (placed on the right) -->
+                <div class="md:hidden flex items-center">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none" id="mobile-menu-button">
+                        <span class="sr-only">Menu</span>
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu (hidden by default) -->
+        <div class="md:hidden" id="mobile-menu" style="display: none;">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="../index.html" class="text-gray-300 hover:text-white block px-3 py-2 text-base font-medium">Retour à l'accueil</a>
+                <a href="dashboard.html" class="text-gray-300 hover:text-white block px-3 py-2 text-base font-medium">Dashboard</a>
+                <a href="journal.html" class="text-primary block px-3 py-2 text-base font-medium border-b-2 border-primary">Journal</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Script to toggle mobile menu -->
+    <script>
+        document.getElementById("mobile-menu-button").addEventListener("click", function() {
+            var menu = document.getElementById("mobile-menu");
+            if (menu.style.display === "none" || menu.style.display === "") {
+                menu.style.display = "block";
+            } else {
+                menu.style.display = "none";
+            }
+        });
+    </script>
+    
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex flex-col md:flex-row gap-6">
+            <!-- Left Sidebar -->
+            <div class="w-full md:w-1/4 space-y-6">
+                <!-- Account Summary -->
+                <div class="card-glass rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Résumé du compte</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-sm text-gray-400">Solde actuel</p>
+                            <p class="text-2xl font-bold text-white">0€</p>
+                        </div>
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-sm text-gray-400">Profit total</p>
+                                <p class="text-lg font-semibold text-profit">+0€</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-400">Perte totale</p>
+                                <p class="text-lg font-semibold text-loss">-0€</p>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">Taux de réussite</p>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                    <div class="bg-primary h-2.5 rounded-full" style="width: 72%"></div>
+                                </div>
+                                <span class="text-sm font-medium text-white">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- MT5 Connection -->
+                <div class="card-glass rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Connexion MT5</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-plug text-primary"></i>
+                                <span class="text-sm text-gray-300">Statut</span>
+                            </div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-100">
+                                Connecté
+                            </span>
+                        </div>
+                        <button class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none">
+                            <i class="fas fa-sync-alt mr-2"></i>
+                            Synchroniser maintenant
+                        </button>
+                        <button class="w-full flex items-center justify-center px-4 py-2 border border-gray-700 rounded-lg shadow-sm text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 focus:outline-none">
+                            <i class="fas fa-cog mr-2"></i>
+                            Paramètres
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="card-glass rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Statistiques rapides</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-gray-800/50 p-3 rounded-lg">
+                            <p class="text-xs text-gray-400">Trades ce mois</p>
+                            <p class="text-lg font-bold text-white">0</p>
+                        </div>
+                        <div class="bg-gray-800/50 p-3 rounded-lg">
+                            <p class="text-xs text-gray-400">Profit moyen</p>
+                            <p class="text-lg font-bold text-profit">0€</p>
+                        </div>
+                        <div class="bg-gray-800/50 p-3 rounded-lg">
+                            <p class="text-xs text-gray-400">Ratio R:R</p>
+                            <p class="text-lg font-bold text-white">0:0</p>
+                        </div>
+                        <div class="bg-gray-800/50 p-3 rounded-lg">
+                            <p class="text-xs text-gray-400">Trades gagnants</p>
+                            <p class="text-lg font-bold text-white">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="w-full md:w-3/4 space-y-6">
+                <!-- Tabs -->
+                <div class="flex border-b border-gray-800">
+                    <button id="journal-tab" class="tab-active px-4 py-3 text-sm font-medium text-white">
+                        Journal de trading
+                    </button>
+                    <button id="calendar-tab" class="px-4 py-3 text-sm font-medium text-gray-400 hover:text-white">
+                        Calendrier des profits
+                    </button>
+                    <button id="stats-tab" class="px-4 py-3 text-sm font-medium text-gray-400 hover:text-white">
+                        Statistiques avancées
+                    </button>
+                </div>
+                
+                <!-- Journal Content -->
+                <div id="journal-content" class="space-y-6">
+                    <!-- Add Trade Button -->
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-white">Vos trades récents</h2>
+                        <button id="add-trade-btn" class="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary-dark focus:outline-none">
+                            <i class="fas fa-plus mr-2"></i>
+                            Ajouter un trade
+                        </button>
+                    </div>
+                    
+                    <!-- Add Trade Modal (hidden by default) -->
+                    <div id="add-trade-modal" class="hidden card-glass rounded-xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-white">Ajouter un trade manuellement</h3>
+                            <button id="close-modal-btn" class="text-gray-400 hover:text-white">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <form class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="symbol" class="block text-sm font-medium text-gray-300 mb-1">Symbole</label>
+                                    <select id="symbol" class="input-field w-full px-4 py-2 rounded-lg text-white focus:outline-none focus:ring-primary focus:border-primary">
+                                        <option value="EURUSD">EUR/USD</option>
+                                        <option value="GBPUSD">GBP/USD</option>
+                                        <option value="USDJPY">USD/JPY</option>
+                                        <option value="XAUUSD">XAU/USD</option>
+                                        <option value="BTCUSD">BTC/USD</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="type" class="block text-sm font-medium text-gray-300 mb-1">Type</label>
+                                    <select id="type" class="input-field w-full px-4 py-2 rounded-lg text-white focus:outline-none focus:ring-primary focus:border-primary">
+                                        <option value="buy">Achat</option>
+                                        <option value="sell">Vente</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="entry" class="block text-sm font-medium text-gray-300 mb-1">Prix d'entrée</label>
+                                    <input type="number" step="0.00001" id="entry" class="input-field w-full px-4 py-2 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary" placeholder="1.10542">
+                                </div>
+                                <div>
+                                    <label for="exit" class="block text-sm font-medium text-gray-300 mb-1">Prix de sortie</label>
+                                    <input type="number" step="0.00001" id="exit" class="input-field w-full px-4 py-2 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary" placeholder="1.10785">
+                                </div>
+                                <div>
+                                    <label for="size" class="block text-sm font-medium text-gray-300 mb-1">Taille (lots)</label>
+                                    <input type="number" step="0.01" id="size" class="input-field w-full px-4 py-2 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary" placeholder="0.10">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="date" class="block text-sm font-medium text-gray-300 mb-1">Date</label>
+                                    <input type="datetime-local" id="date" class="input-field w-full px-4 py-2 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary">
+                                </div>
+                                <div>
+                                    <label for="duration" class="block text-sm font-medium text-gray-300 mb-1">Durée</label>
+                                    <input type="text" id="duration" class="input-field w-full px-4 py-2 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary" placeholder="2h 15m">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="notes" class="block text-sm font-medium text-gray-300 mb-1">Notes</label>
+                                <textarea id="notes" rows="3" class="input-field w-full px-4 py-2 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary" placeholder="Détails sur le trade..."></textarea>
+                            </div>
+                            
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" class="px-4 py-2 border border-gray-700 rounded-lg text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 focus:outline-none">
+                                    Annuler
+                                </button>
+                                <button type="submit" class="px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none">
+                                    Enregistrer le trade
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Trades Table -->
+                    <div class="card-glass rounded-xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-700">
+                                <thead class="bg-gray-800/50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Symbole</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Type</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Taille</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Entrée</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Sortie</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Résultat</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-gray-900/50 divide-y divide-gray-700">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="px-6 py-4 bg-gray-800/50 flex items-center justify-between border-t border-gray-700">
+                            <div class="flex-1 flex justify-between sm:hidden">
+                                <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700">Précédent</a>
+                                <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700">Suivant</a>
+                            </div>
+                            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-400">
+                                        Affichage de <span class="font-medium">1</span> à <span class="font-medium">1</span> sur <span class="font-medium">0</span> trades
+                                    </p>
+                                </div>
+                                <div>
+                                    <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
+                                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-lg border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700">
+                                            <span class="sr-only">Précédent</span>
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                        <a href="#" aria-current="page" class="z-10 bg-primary border-primary text-white relative inline-flex items-center px-4 py-2 border text-sm font-medium"> 1 </a>
+                                        <a href="#" class="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 relative inline-flex items-center px-4 py-2 border text-sm font-medium"> 2 </a>
+                                        <a href="#" class="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 relative inline-flex items-center px-4 py-2 border text-sm font-medium"> 3 </a>
+                                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-lg border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700">
+                                            <span class="sr-only">Suivant</span>
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Calendar Content (hidden by default) -->
+                <div id="calendar-content" class="hidden space-y-6">
+                    <h2 class="text-xl font-bold text-white">Calendrier des profits</h2>
+                    <div class="card-glass rounded-xl p-4">
+                        <div id="calendar" class="h-[600px]"></div>
+                    </div>
+                </div>
+                
+                <!-- Stats Content (hidden by default) -->
+                <div id="stats-content" class="hidden space-y-6">
+                    <h2 class="text-xl font-bold text-white">Statistiques avancées</h2>
+                    <div class="card-glass rounded-xl p-6">
+                        <p class="text-gray-400">Statistiques détaillées à venir...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black py-8 border-t border-gray-800 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-gray-400 text-sm">
+                <p>© 2025 Astral Trading. Tous droits réservés.</p>
+                <p class="mt-1">Le trading comporte des risques de perte en capital.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.min.js"></script>
+    <script>
+        // Initialize calendar when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching functionality
+            const journalTab = document.getElementById('journal-tab');
+            const calendarTab = document.getElementById('calendar-tab');
+            const statsTab = document.getElementById('stats-tab');
+            
+            const journalContent = document.getElementById('journal-content');
+            const calendarContent = document.getElementById('calendar-content');
+            const statsContent = document.getElementById('stats-content');
+            
+            function switchTab(activeTab, activeContent) {
+                // Reset all tabs
+                [journalTab, calendarTab, statsTab].forEach(tab => {
+                    tab.classList.remove('tab-active');
+                    tab.classList.add('text-gray-400', 'hover:text-white');
+                });
+                
+                // Reset all contents
+                [journalContent, calendarContent, statsContent].forEach(content => {
+                    content.classList.add('hidden');
+                });
+                
+                // Activate selected tab
+                activeTab.classList.add('tab-active');
+                activeTab.classList.remove('text-gray-400', 'hover:text-white');
+                
+                // Show selected content
+                activeContent.classList.remove('hidden');
+            }
+            
+            journalTab.addEventListener('click', () => switchTab(journalTab, journalContent));
+            calendarTab.addEventListener('click', () => switchTab(calendarTab, calendarContent));
+            statsTab.addEventListener('click', () => switchTab(statsTab, statsContent));
+            
+            // Add trade modal functionality
+            const addTradeBtn = document.getElementById('add-trade-btn');
+            const addTradeModal = document.getElementById('add-trade-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            
+            addTradeBtn.addEventListener('click', () => {
+                addTradeModal.classList.remove('hidden');
+            });
+            
+            closeModalBtn.addEventListener('click', () => {
+                addTradeModal.classList.add('hidden');
+            });
+            
+            // Initialize FullCalendar
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'fr',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,dayGridWeek'
+                },
+                events: [
+                    {
+                        title: '+$121.50',
+                        start: '2023-06-15',
+                        className: 'profit-event',
+                        extendedProps: {
+                            symbol: 'EUR/USD',
+                            type: 'Achat',
+                            size: '0.50 lots'
+                        }
+                    },
+                    {
+                        title: '-$62.50',
+                        start: '2023-06-14',
+                        className: 'loss-event',
+                        extendedProps: {
+                            symbol: 'XAU/USD',
+                            type: 'Vente',
+                            size: '0.10 lots'
+                        }
+                    },
+                    {
+                        title: '+$69.00',
+                        start: '2023-06-13',
+                        className: 'profit-event',
+                        extendedProps: {
+                            symbol: 'GBP/USD',
+                            type: 'Achat',
+                            size: '0.20 lots'
+                        }
+                    },
+                    {
+                        title: '+$129.00',
+                        start: '2023-06-12',
+                        className: 'profit-event',
+                        extendedProps: {
+                            symbol: 'USD/JPY',
+                            type: 'Vente',
+                            size: '0.30 lots'
+                        }
+                    },
+                    {
+                        title: '-$65.00',
+                        start: '2023-06-10',
+                        className: 'loss-event',
+                        extendedProps: {
+                            symbol: 'BTC/USD',
+                            type: 'Achat',
+                            size: '0.05 lots'
+                        }
+                    }
+                ],
+                eventClick: function(info) {
+                    const event = info.event;
+                    alert(
+                        `Trade du ${event.start.toLocaleDateString('fr-FR')}\n` +
+                        `Symbole: ${event.extendedProps.symbol}\n` +
+                        `Type: ${event.extendedProps.type}\n` +
+                        `Taille: ${event.extendedProps.size}\n` +
+                        `Résultat: ${event.title}`
+                    );
+                },
+                dayMaxEventRows: true,
+                views: {
+                    dayGridMonth: {
+                        dayMaxEventRows: 3
+                    }
+                }
+            });
+            
+            calendar.render();
+            
+            // Animation on load
+            const elements = document.querySelectorAll('.slide-up');
+            elements.forEach(element => {
+                element.style.animationPlayState = 'running';
+            });
+        });
+    </script>
+</body>
+</html>

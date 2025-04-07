@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AstralTrading</title>
-        <!-- Balises de base -->
+    <!-- Balises de base -->
     <title>Astral Trading - Deviens maître de ton trading</title>
     <meta name="description" content="Gère tes bots, suis ton journal de trading et progresse avec Astral Trading.">
 
@@ -260,71 +260,76 @@
         display: block;
         }
     </style>
+
     <!-- Firebase SDK v9 Compat (auth + firestore + UI) -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-<!-- FirebaseUI CSS + JS -->
-<link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.css" />
-<script src="https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.js"></script>
+    <!-- FirebaseUI CSS + JS -->
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.css" />
+    <script src="https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.js"></script>
 
-<script>
-  // Configuration Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyBOks3pghhiGNRtTSDSPiIzGs1JgfUZz5M",
-    authDomain: "astral-trading.firebaseapp.com",
-    projectId: "astral-trading",
-    storageBucket: "astral-trading.appspot.com",
-    messagingSenderId: "269125744623",
-    appId: "1:269125744623:web:8060af03ecc845a62a681a"
-  };
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOks3pghhiGNRtTSDSPiIzGs1JgfUZz5M",
+            authDomain: "astral-trading.firebaseapp.com",
+            projectId: "astral-trading",
+            storageBucket: "astral-trading.appspot.com",
+            messagingSenderId: "269125744623",
+            appId: "1:269125744623:web:8060af03ecc845a62a681a"
+        };
 
-  // Initialisation Firebase
-  firebase.initializeApp(firebaseConfig);
+        // Initialisation Firebase
+        firebase.initializeApp(firebaseConfig);
 
-  const ui = new firebaseui.auth.AuthUI(firebase.auth());
+        const ui = new firebaseui.auth.AuthUI(firebase.auth());
 
-  const uiConfig = {
-    signInOptions: [
-      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      firebase.auth.AppleAuthProvider.PROVIDER_ID,
-      firebase.auth.EmailAuthProvider.PROVIDER_ID
-    ],
-    signInSuccessUrl: "/", // Redirige vers la home après connexion
-  };
+        const uiConfig = {
+            signInOptions: [
+                firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+                firebase.auth.AppleAuthProvider.PROVIDER_ID,
+                firebase.auth.EmailAuthProvider.PROVIDER_ID
+            ],
+            signInSuccessUrl: "/", // Redirige vers la home après connexion
+        };
 
-  // Fonction qui ouvre l'UI Firebase au clic
-  function login() {
-    document.getElementById("firebaseui-auth-container").style.display = "block"; // Affiche le conteneur d'auth
-    ui.start("#firebaseui-auth-container", uiConfig); // Lance Firebase UI
-  }
+        // Fonction qui ouvre l'UI Firebase au clic
+        function login() {
+            console.log("Afficher le conteneur d'authentification");  // Debugger pour voir si la fonction est appelée
+            document.getElementById("firebaseui-auth-container").style.display = "block"; // Affiche le conteneur d'auth
+            ui.start("#firebaseui-auth-container", uiConfig); // Lance Firebase UI
+        }
 
-  document.getElementById("loginButton").addEventListener("click", login); // Connecte le bouton de login avec la fonction login
+        document.getElementById("loginButton").addEventListener("click", () => {
+            console.log("Bouton de connexion cliqué");  // Debugger pour vérifier si le clic est bien capturé
+            login(); // Appelle la fonction login
+        });
 
-  document.getElementById("logoutButton").addEventListener("click", () => {
-    firebase.auth().signOut().then(() => location.reload()); // Déconnexion avec reload de la page
-  });
+        document.getElementById("logoutButton").addEventListener("click", () => {
+            firebase.auth().signOut().then(() => location.reload()); // Déconnexion avec reload de la page
+        });
 
-  firebase.auth().onAuthStateChanged(user => {
-    if (user) {
-      document.getElementById("loginButton").style.display = "none"; // Cache le bouton de login
-      document.getElementById("logoutButton").style.display = "block"; // Affiche le bouton de logout
-      document.getElementById("userBubble").style.display = "flex"; // Affiche la bulle utilisateur
-      document.getElementById("userStatus").style.display = "block"; // Affiche le message "connecté"
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById("loginButton").style.display = "none"; // Cache le bouton de login
+                document.getElementById("logoutButton").style.display = "block"; // Affiche le bouton de logout
+                document.getElementById("userBubble").style.display = "flex"; // Affiche la bulle utilisateur
+                document.getElementById("userStatus").style.display = "block"; // Affiche le message "connecté"
 
-      const firstLetter = user.displayName ? user.displayName.charAt(0).toUpperCase() : "?";
-      document.getElementById("userBubble").textContent = firstLetter; // Affiche la première lettre dans la bulle
-      document.getElementById("userStatus").textContent = `Connecté en tant que ${user.displayName || "Utilisateur"}`; // Affiche le statut
-    } else {
-      document.getElementById("loginButton").style.display = "block"; // Affiche le bouton de login si non connecté
-      document.getElementById("logoutButton").style.display = "none"; // Cache le bouton de logout
-      document.getElementById("userBubble").style.display = "none"; // Cache la bulle utilisateur
-      document.getElementById("userStatus").style.display = "none"; // Cache le message "connecté"
-      document.getElementById("firebaseui-auth-container").style.display = "none"; // Cache le conteneur FirebaseUI
-    }
-  });
-</script>
+                const firstLetter = user.displayName ? user.displayName.charAt(0).toUpperCase() : "?";
+                document.getElementById("userBubble").textContent = firstLetter; // Affiche la première lettre dans la bulle
+                document.getElementById("userStatus").textContent = `Connecté en tant que ${user.displayName || "Utilisateur"}`; // Affiche le statut
+            } else {
+                document.getElementById("loginButton").style.display = "block"; // Affiche le bouton de login si non connecté
+                document.getElementById("logoutButton").style.display = "none"; // Cache le bouton de logout
+                document.getElementById("userBubble").style.display = "none"; // Cache la bulle utilisateur
+                document.getElementById("userStatus").style.display = "none"; // Cache le message "connecté"
+                document.getElementById("firebaseui-auth-container").style.display = "none"; // Cache le conteneur FirebaseUI
+            }
+        });
+    </script>
 </head>
 
 <body class="gradient-bg">

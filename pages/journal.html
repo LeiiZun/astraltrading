@@ -10,9 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <!-- Chart.js pour les graphiques -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -34,14 +31,12 @@
             padding: 20px;
         }
 
-        .trade-form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .balance-box {
             background-color: #1e1e1e;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
         }
 
         input {
@@ -51,6 +46,7 @@
             background-color: #333;
             color: #fff;
             font-size: 14px;
+            margin-top: 10px;
         }
 
         button {
@@ -61,57 +57,11 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin-top: 10px;
         }
 
         button:hover {
             background-color: #0097a7;
-        }
-
-        .stat-box {
-            background-color: #1e1e1e;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .stat-box h2 {
-            color: #00bcd4;
-            margin-top: 0;
-        }
-
-        .chart-container {
-            margin-top: 40px;
-            position: relative;
-            height: 400px;
-        }
-
-        .trade-table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-            background-color: #1e1e1e;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .trade-table th, .trade-table td {
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #333;
-        }
-
-        .trade-table th {
-            background-color: #333;
-            color: #fff;
-        }
-
-        .trade-table tr:nth-child(even) {
-            background-color: #222;
-        }
-
-        .trade-table tr:nth-child(odd) {
-            background-color: #1e1e1e;
         }
 
         .logout-btn {
@@ -141,41 +91,13 @@
         <div id="loginStatus" class="login-status" style="display: none;">Connecté en tant que : <span id="userName"></span></div>
         <button id="logoutButton" style="display: none;" class="logout-btn">Se déconnecter</button>
 
-        <!-- Formulaire pour ajouter un trade -->
-        <div class="trade-form">
-            <input type="text" id="pair" placeholder="Paire de Trading (ex: EUR/USD)" required>
-            <input type="number" id="entryPrice" placeholder="Prix d'entrée" step="0.01" required>
-            <input type="number" id="exitPrice" placeholder="Prix de sortie" step="0.01" required>
-            <input type="number" id="tradeAmount" placeholder="Montant" required>
-            <button id="addTradeButton">Ajouter Trade</button>
+        <!-- Affichage du solde -->
+        <div class="balance-box">
+            <h2>Solde actuel</h2>
+            <p id="balanceAmount">0</p>
+            <input type="number" id="amountChange" placeholder="Montant à ajouter ou soustraire" required>
+            <button id="updateBalanceButton">Mettre à jour le solde</button>
         </div>
-
-        <!-- Affichage des statistiques -->
-        <div class="stat-box">
-            <h2>Statistiques</h2>
-            <p>Taux de réussite : <span id="winRate">0%</span></p>
-            <p>Profit / Perte total : <span id="totalProfitLoss">0</span></p>
-        </div>
-
-        <!-- Graphique des performances -->
-        <div class="chart-container">
-            <canvas id="performanceChart"></canvas>
-        </div>
-
-        <!-- Tableau des trades -->
-        <table class="trade-table" id="tradeTable">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Paire</th>
-                    <th>Prix d'entrée</th>
-                    <th>Prix de sortie</th>
-                    <th>Montant</th>
-                    <th>Profit / Perte</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
     </div>
 
     <script>
@@ -192,97 +114,46 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        const pair = document.getElementById("pair");
-        const entryPrice = document.getElementById("entryPrice");
-        const exitPrice = document.getElementById("exitPrice");
-        const tradeAmount = document.getElementById("tradeAmount");
-        const addTradeButton = document.getElementById("addTradeButton");
-        const tradeTable = document.getElementById("tradeTable").getElementsByTagName("tbody")[0];
-        const winRate = document.getElementById("winRate");
-        const totalProfitLoss = document.getElementById("totalProfitLoss");
-        const performanceChart = document.getElementById("performanceChart");
+        const balanceAmount = document.getElementById("balanceAmount");
+        const amountChange = document.getElementById("amountChange");
+        const updateBalanceButton = document.getElementById("updateBalanceButton");
         const logoutButton = document.getElementById("logoutButton");
         const loginStatus = document.getElementById("loginStatus");
         const userName = document.getElementById("userName");
 
-        let winCount = 0;
-        let lossCount = 0;
-        let totalPL = 0;
-
-        // Fonction pour calculer et afficher les statistiques
-        const calculateStats = () => {
-            const totalTrades = winCount + lossCount;
-            const winRatePercentage = totalTrades > 0 ? (winCount / totalTrades * 100).toFixed(2) : 0;
-            winRate.textContent = `${winRatePercentage}%`;
-            totalProfitLoss.textContent = totalPL.toFixed(2);
+        // Fonction pour charger et afficher le solde de l'utilisateur
+        const loadBalance = (uid) => {
+            const balanceRef = db.collection("journals").doc(uid);
+            balanceRef.get().then(doc => {
+                if (doc.exists) {
+                    balanceAmount.textContent = doc.data().balance.toFixed(2);
+                } else {
+                    // Si aucune donnée existante, initialiser à 0
+                    balanceAmount.textContent = "0";
+                }
+            });
         };
 
-        // Fonction pour ajouter un trade et l'enregistrer dans Firestore
-        addTradeButton.onclick = () => {
+        // Fonction pour mettre à jour le solde de l'utilisateur
+        updateBalanceButton.onclick = () => {
             const user = auth.currentUser;
             if (user) {
-                const pairValue = pair.value;
-                const entry = parseFloat(entryPrice.value);
-                const exit = parseFloat(exitPrice.value);
-                const amount = parseFloat(tradeAmount.value);
+                const newAmount = parseFloat(amountChange.value);
+                const balanceRef = db.collection("journals").doc(user.uid);
 
-                const profitLoss = (exit - entry) * amount;
-                const isWinningTrade = profitLoss > 0;
+                balanceRef.get().then(doc => {
+                    let currentBalance = doc.exists ? doc.data().balance : 0;
+                    const updatedBalance = currentBalance + newAmount;
 
-                // Ajouter le trade à la collection Firestore
-                db.collection("journals").doc(user.uid).collection("trades").add({
-                    pair: pairValue,
-                    entryPrice: entry,
-                    exitPrice: exit,
-                    tradeAmount: amount,
-                    profitLoss: profitLoss,
-                    date: firebase.firestore.FieldValue.serverTimestamp()
+                    // Mettre à jour le solde dans Firestore
+                    balanceRef.set({
+                        balance: updatedBalance
+                    }, { merge: true });
+
+                    // Mettre à jour l'affichage local
+                    balanceAmount.textContent = updatedBalance.toFixed(2);
                 });
-
-                // Mettre à jour le tableau
-                const row = tradeTable.insertRow();
-                row.insertCell(0).textContent = new Date().toLocaleString();
-                row.insertCell(1).textContent = pairValue;
-                row.insertCell(2).textContent = entry.toFixed(2);
-                row.insertCell(3).textContent = exit.toFixed(2);
-                row.insertCell(4).textContent = amount;
-                row.insertCell(5).textContent = profitLoss.toFixed(2);
-
-                // Mettre à jour les statistiques
-                if (isWinningTrade) winCount++;
-                else lossCount++;
-                totalPL += profitLoss;
-
-                calculateStats();
-                pair.value = entryPrice.value = exitPrice.value = tradeAmount.value = ""; // Réinitialiser le formulaire
             }
-        };
-
-        // Fonction pour charger les trades de l'utilisateur
-        const loadTrades = (uid) => {
-            const tradesRef = db.collection("journals").doc(uid).collection("trades");
-            tradesRef.get().then(snapshot => {
-                snapshot.forEach(doc => {
-                    const trade = doc.data();
-                    const profitLoss = trade.profitLoss;
-
-                    // Mettre à jour le tableau avec les trades de Firestore
-                    const row = tradeTable.insertRow();
-                    row.insertCell(0).textContent = new Date(trade.date.seconds * 1000).toLocaleString();
-                    row.insertCell(1).textContent = trade.pair;
-                    row.insertCell(2).textContent = trade.entryPrice.toFixed(2);
-                    row.insertCell(3).textContent = trade.exitPrice.toFixed(2);
-                    row.insertCell(4).textContent = trade.tradeAmount;
-                    row.insertCell(5).textContent = profitLoss.toFixed(2);
-
-                    // Mettre à jour les statistiques
-                    if (profitLoss > 0) winCount++;
-                    else lossCount++;
-                    totalPL += profitLoss;
-                });
-
-                calculateStats();
-            });
         };
 
         // Fonction pour gérer la connexion de l'utilisateur
@@ -291,7 +162,7 @@
                 loginStatus.style.display = 'block';
                 userName.textContent = user.displayName || user.email;
                 logoutButton.style.display = 'block';
-                loadTrades(user.uid); // Charger les trades existants
+                loadBalance(user.uid); // Charger le solde existant
             } else {
                 loginStatus.style.display = 'none';
                 logoutButton.style.display = 'none';
@@ -313,47 +184,6 @@
         }).catch(error => {
             console.error("Erreur de connexion : ", error);
         });
-
-        // Initialiser le graphique des performances
-        const ctx = performanceChart.getContext('2d');
-        const performanceData = {
-            labels: [], // Labels pour les dates
-            datasets: [{
-                label: 'Profit / Perte',
-                data: [],
-                borderColor: '#00bcd4',
-                backgroundColor: 'rgba(0, 188, 212, 0.2)',
-                borderWidth: 1
-            }]
-        };
-
-        const performanceChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: performanceData,
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        beginAtZero: true
-                    },
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // Fonction pour mettre à jour le graphique en temps réel
-        const updateChart = () => {
-            performanceData.labels.push(new Date().toLocaleString());
-            performanceData.datasets[0].data.push(totalPL);
-            performanceChartInstance.update();
-        };
-
-        // Mettre à jour le graphique lorsque un trade est ajouté
-        addTradeButton.onclick = () => {
-            updateChart();
-        };
     </script>
 </body>
 </html>

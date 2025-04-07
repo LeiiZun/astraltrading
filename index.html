@@ -339,6 +339,9 @@
         userBubble.style.display = "inline-flex";
         userStatus.style.display = "block";
         userStatus.textContent = `Connecté en tant que ${name}`;
+        document.getElementById('user-email').textContent = user.email;
+        const prenom = user.displayName.split(" ")[0]; // Prend le prénom
+        document.getElementById('welcome-text').textContent = `Bonjour ${prenom},`;
         loginBtn.style.display = "none";
         logoutBtn.style.display = "block";
       } else {
@@ -354,6 +357,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="md:flex md:items-center md:justify-between">
                 <div class="md:w-1/2 mb-10 md:mb-0 slide-up">
+                    <p id="welcome-text" style="font-size: 14px; margin-bottom: 8px; color: #ccc;"></p>
                     <h1 class="text-4xl md:text-5xl font-bold mb-4">Maîtrisez le Trading avec <span class="text-primary">Astral !</span></h1>
                     <p class="text-xl text-gray-300 mb-8">Notre méthode, expliquée et appliquée pour des résultats concrets.</p>
                     <div class="flex space-x-4">

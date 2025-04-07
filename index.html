@@ -328,45 +328,90 @@
 </head>
 
 <body class="gradient-bg">
-  <!-- Navigation -->
-  <nav class="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-16 items-center">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <span class="text-xl font-bold text-white">Astral<span class="text-primary"> Trading</span></span>
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <span class="text-xl font-bold text-white">Astral<span class="text-primary"> Trading</span></span>
+            </div>
           </div>
-        </div>
-        <div class="hidden md:block">
-          <div class="ml-10 flex items-center space-x-8">
-            <a href="#home" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Accueil</a>
-            <a href="pages/calculateur.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Calculateur</a>
-            <a href="pages/cours.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Cours</a>
-            <a href="pages/bot.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mes Bots</a>
-            <a href="pages/journal.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
-
-            <!-- Bouton de connexion avec icône Google -->
-            <button id="loginButton" class="flex items-center space-x-2 text-white bg-primary px-3 py-1 rounded hover:bg-blue-600">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" alt="Google" class="w-5 h-5">
-                <span>Se connecter avec Google</span>
-            </button>
-
-            <!-- Bulle utilisateur -->
-            <div id="userBubble" class="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center font-bold" style="display:none;"></div>
-
-            <!-- Texte connecté -->
-            <div id="userStatus" class="text-white text-sm" style="display:none;"></div>
-
-            <!-- Déconnexion -->
-            <button id="logoutButton" style="display:none;" class="ml-4 text-white px-3 py-1 bg-red-600 rounded hover:bg-red-700">Se déconnecter</button>
+          <!-- Desktop Menu -->
+          <div class="hidden md:block">
+            <div class="ml-10 flex items-center space-x-8">
+              <a href="#home" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Accueil</a>
+              <a href="pages/calculateur.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Calculateur</a>
+              <a href="pages/cours.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Cours</a>
+              <a href="pages/bot.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mes Bots</a>
+              <a href="pages/journal.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
+  
+              <!-- Bouton de connexion -->
+              <button id="loginButton" class="text-white border px-3 py-1 rounded">Se connecter</button>
+  
+              <!-- Bulle pour afficher la première lettre -->
+              <div class="user-bubble" id="userBubble" style="display:none; background: white; color: black; font-weight: bold; padding: 8px 12px; border-radius: 50%;"></div>
+  
+              <!-- Message "Connecté" -->
+              <div class="user-status text-green-400 text-sm font-semibold" id="userStatus" style="display:none;">Connecté</div>
+  
+              <!-- Bouton de déconnexion -->
+              <button onclick="logout()" id="logoutButton" style="display:none;" class="text-red-400 text-sm ml-4">Se déconnecter</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </nav>
-
-  <!-- Conteneur FirebaseUI (doit être caché par défaut) -->
-  <div id="firebaseui-auth-container" class="p-4" style="display:none;"></div>
+    </nav>
+  
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  
+    <!-- Script de connexion -->
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyBOks3pghhiGNRtTSDSPiIzGs1JgfUZz5M",
+        authDomain: "astral-trading.firebaseapp.com",
+        projectId: "astral-trading",
+        storageBucket: "astral-trading.firebasestorage.app",
+        messagingSenderId: "269125744623",
+        appId: "1:269125744623:web:8060af03ecc845a62a681a"
+      };
+  
+      // Initialisation Firebase
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+  
+      const loginBtn = document.getElementById("loginButton");
+      const logoutBtn = document.getElementById("logoutButton");
+      const userBubble = document.getElementById("userBubble");
+      const userStatus = document.getElementById("userStatus");
+  
+      loginBtn.onclick = () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider);
+      };
+  
+      logoutBtn.onclick = () => auth.signOut();
+  
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          const name = user.displayName || "Utilisateur";
+          userBubble.textContent = name.charAt(0).toUpperCase();
+          userBubble.style.display = "inline-flex";
+          userStatus.style.display = "block";
+          userStatus.textContent = `Connecté en tant que ${name}`;
+          loginBtn.style.display = "none";
+          logoutBtn.style.display = "block";
+        } else {
+          userBubble.style.display = "none";
+          userStatus.style.display = "none";
+          loginBtn.style.display = "block";
+          logoutBtn.style.display = "none";
+        }
+      });
+    </script>
     <!-- Hero Section -->
     <section id="home" class="relative overflow-hidden py-20 md:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -9,7 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    
+
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -25,18 +25,38 @@
             margin-top: 40px;
         }
 
+        .navbar {
+            background-color: #333;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px;
+        }
+
+        .navbar a:hover {
+            background-color: #444;
+            border-radius: 5px;
+        }
+
         .container {
             width: 80%;
             margin: auto;
             padding: 20px;
         }
 
-        .balance-box {
+        .trade-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             background-color: #1e1e1e;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            text-align: center;
         }
 
         input {
@@ -46,7 +66,6 @@
             background-color: #333;
             color: #fff;
             font-size: 14px;
-            margin-top: 10px;
         }
 
         button {
@@ -57,10 +76,63 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
-            margin-top: 10px;
         }
 
         button:hover {
+            background-color: #0097a7;
+        }
+
+        .stat-box {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-box h2 {
+            color: #00bcd4;
+            margin-top: 0;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .history-table th, .history-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #444;
+        }
+
+        .history-table th {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .history-table td {
+            background-color: #222;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            background-color: #00bcd4;
+            color: white;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .pagination button:hover {
             background-color: #0097a7;
         }
 
@@ -76,27 +148,49 @@
         .logout-btn:hover {
             background-color: #d32f2f;
         }
-
-        .login-status {
-            color: #fff;
-            font-size: 14px;
-            text-align: right;
-        }
     </style>
 </head>
 <body>
+    <div class="navbar">
+        <a href="/">Retour à l'Accueil</a>
+        <button id="logoutButton" class="logout-btn">Se déconnecter</button>
+    </div>
+
     <div class="container">
         <h1>Journal de Trading</h1>
 
         <div id="loginStatus" class="login-status" style="display: none;">Connecté en tant que : <span id="userName"></span></div>
-        <button id="logoutButton" style="display: none;" class="logout-btn">Se déconnecter</button>
+
+        <!-- Formulaire pour ajouter ou soustraire un montant -->
+        <div class="trade-form">
+            <input type="number" id="balanceChange" placeholder="Montant à ajouter ou soustraire" required>
+            <button id="updateBalanceButton">Mettre à jour le solde</button>
+        </div>
 
         <!-- Affichage du solde -->
-        <div class="balance-box">
+        <div class="stat-box">
             <h2>Solde actuel</h2>
-            <p id="balanceAmount">0</p>
-            <input type="number" id="amountChange" placeholder="Montant à ajouter ou soustraire" required>
-            <button id="updateBalanceButton">Mettre à jour le solde</button>
+            <p>Solde : <span id="balance">0.00</span></p>
+        </div>
+
+        <!-- Historique des transactions -->
+        <div class="stat-box">
+            <h2>Historique des transactions</h2>
+            <table class="history-table" id="historyTable">
+                <thead>
+                    <tr>
+                        <th>Montant</th>
+                        <th>Heure</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Historique des transactions sera ajouté ici -->
+                </tbody>
+            </table>
+            <div class="pagination">
+                <button id="pagePrevious" disabled>Page précédente</button>
+                <button id="pageNext">Page suivante</button>
+            </div>
         </div>
     </div>
 
@@ -110,80 +204,118 @@
             appId: "1:269125744623:web:8060af03ecc845a62a681a"
         };
 
+        // Initialiser Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        const balanceAmount = document.getElementById("balanceAmount");
-        const amountChange = document.getElementById("amountChange");
+        const balanceChange = document.getElementById("balanceChange");
         const updateBalanceButton = document.getElementById("updateBalanceButton");
+        const balanceElement = document.getElementById("balance");
         const logoutButton = document.getElementById("logoutButton");
-        const loginStatus = document.getElementById("loginStatus");
-        const userName = document.getElementById("userName");
+        const historyTable = document.getElementById("historyTable").getElementsByTagName('tbody')[0];
+        const pagePrevious = document.getElementById("pagePrevious");
+        const pageNext = document.getElementById("pageNext");
 
-        // Fonction pour charger et afficher le solde de l'utilisateur
-        const loadBalance = (uid) => {
-            const balanceRef = db.collection("journals").doc(uid);
-            balanceRef.get().then(doc => {
+        let userId = null;
+        let currentPage = 1;
+        const pageSize = 5;
+
+        // Vérifier si un utilisateur est connecté
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                userId = user.uid;
+                loadBalance(userId);
+                loadTransactionHistory(userId);
+                logoutButton.style.display = "block";
+            } else {
+                window.location.href = '/';
+            }
+        });
+
+        // Fonction pour charger le solde depuis Firestore
+        const loadBalance = (userId) => {
+            const userRef = db.collection("journals").doc(userId);
+            userRef.get().then(doc => {
                 if (doc.exists) {
-                    balanceAmount.textContent = doc.data().balance.toFixed(2);
+                    const data = doc.data();
+                    const balance = data.balance || 0.00;
+                    balanceElement.textContent = balance.toFixed(2);
                 } else {
-                    // Si aucune donnée existante, initialiser à 0
-                    balanceAmount.textContent = "0";
+                    balanceElement.textContent = "0.00";
                 }
+            }).catch(error => {
+                console.error("Erreur de chargement du solde :", error);
             });
         };
 
-        // Fonction pour mettre à jour le solde de l'utilisateur
-        updateBalanceButton.onclick = () => {
-            const user = auth.currentUser;
-            if (user) {
-                const newAmount = parseFloat(amountChange.value);
-                const balanceRef = db.collection("journals").doc(user.uid);
+        // Fonction pour charger l'historique des transactions
+        const loadTransactionHistory = (userId) => {
+            const historyRef = db.collection("journals").doc(userId).collection("transactions").orderBy("timestamp", "desc").limit(pageSize * currentPage);
+            historyRef.get().then(querySnapshot => {
+                historyTable.innerHTML = "";
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const row = historyTable.insertRow();
+                    const amountCell = row.insertCell(0);
+                    const timeCell = row.insertCell(1);
 
-                balanceRef.get().then(doc => {
-                    let currentBalance = doc.exists ? doc.data().balance : 0;
-                    const updatedBalance = currentBalance + newAmount;
-
-                    // Mettre à jour le solde dans Firestore
-                    balanceRef.set({
-                        balance: updatedBalance
-                    }, { merge: true });
-
-                    // Mettre à jour l'affichage local
-                    balanceAmount.textContent = updatedBalance.toFixed(2);
+                    amountCell.textContent = data.amount.toFixed(2);
+                    timeCell.textContent = new Date(data.timestamp.seconds * 1000).toLocaleString();
                 });
+
+                const totalTransactions = querySnapshot.size;
+                pageNext.disabled = totalTransactions < pageSize;
+                pagePrevious.disabled = currentPage <= 1;
+            });
+        };
+
+        // Mise à jour du solde et ajout d'une transaction
+        updateBalanceButton.onclick = () => {
+            const changeAmount = parseFloat(balanceChange.value);
+            if (!isNaN(changeAmount)) {
+                const userRef = db.collection("journals").doc(userId);
+                userRef.get().then(doc => {
+                    let newBalance = 0.00;
+                    if (doc.exists) {
+                        newBalance = doc.data().balance || 0.00;
+                    }
+                    newBalance += changeAmount;
+
+                    userRef.set({ balance: newBalance }, { merge: true });
+
+                    const transactionRef = userRef.collection("transactions").add({
+                        amount: changeAmount,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    balanceElement.textContent = newBalance.toFixed(2);
+                    loadTransactionHistory(userId);
+                });
+            } else {
+                alert("Veuillez entrer un montant valide.");
+            }
+            balanceChange.value = "";
+        };
+
+        // Gestion de la pagination
+        pageNext.onclick = () => {
+            currentPage++;
+            loadTransactionHistory(userId);
+        };
+
+        pagePrevious.onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadTransactionHistory(userId);
             }
         };
 
-        // Fonction pour gérer la connexion de l'utilisateur
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                loginStatus.style.display = 'block';
-                userName.textContent = user.displayName || user.email;
-                logoutButton.style.display = 'block';
-                loadBalance(user.uid); // Charger le solde existant
-            } else {
-                loginStatus.style.display = 'none';
-                logoutButton.style.display = 'none';
-            }
-        });
-
-        // Fonction pour déconnecter l'utilisateur
+        // Déconnexion de l'utilisateur
         logoutButton.onclick = () => {
             auth.signOut();
-            window.location.reload();
+            window.location.href = '/';
         };
-
-        // Connexion avec Google (authentification Firebase)
-        const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithPopup(googleAuthProvider).then(result => {
-            // Connexion réussie
-            const user = result.user;
-            console.log("Utilisateur connecté : " + user.displayName);
-        }).catch(error => {
-            console.error("Erreur de connexion : ", error);
-        });
     </script>
 </body>
 </html>

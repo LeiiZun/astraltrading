@@ -332,30 +332,24 @@
     logoutBtn.onclick = () => auth.signOut();
 
     // Vérifie l'état de l'utilisateur
-        onAuthStateChanged(auth, (user) => {
-        if (user) {
-            console.log("Utilisateur connecté :", user.email);
-
-            // 🔥 Affiche l'email dans le header
-            document.getElementById('user-email').textContent = user.email;
-
-            // 👋 Affiche le prénom dans le texte d’accueil
-            const prenom = user.displayName.split(" ")[0];
-            document.getElementById('welcome-text').textContent = `Bonjour ${prenom},`;
-
-            // 🔓 Affiche les sections protégées (formulaire + historique)
-            document.getElementById('auth-section').style.display = 'none';
-            document.getElementById('form-section').style.display = 'block';
-            document.getElementById('history-section').style.display = 'block';
-
-        } else {
-            console.log("Utilisateur non connecté");
-            document.getElementById('user-email').textContent = '';
-            document.getElementById('welcome-text').textContent = '';
-            document.getElementById('auth-section').style.display = 'block';
-            document.getElementById('form-section').style.display = 'none';
-            document.getElementById('history-section').style.display = 'none';
-        }
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        const name = user.displayName || "Utilisateur";
+        userBubble.textContent = name.charAt(0).toUpperCase();
+        userBubble.style.display = "inline-flex";
+        userStatus.style.display = "block";
+        userStatus.textContent = `Connecté en tant que ${name}`;
+        document.getElementById('user-email').textContent = user.email;
+        const prenom = user.displayName.split(" ")[0]; // Prend le prénom
+        document.getElementById('welcome-text').textContent = `Bonjour ${prenom},`;
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "block";
+      } else {
+        userBubble.style.display = "none";
+        userStatus.style.display = "none";
+        loginBtn.style.display = "block";
+        logoutBtn.style.display = "none";
+      }
     });
   </script>
     <!-- Hero Section -->

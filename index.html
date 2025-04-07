@@ -18,6 +18,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+        <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -264,96 +269,87 @@
 <body class="gradient-bg">
     <!-- Navigation -->
     <nav class="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <span class="text-xl font-bold text-white">Astral<span class="text-primary"> Trading</span></span>
-                    </div>
-                </div>
-                <!-- Desktop Menu -->
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-center space-x-8">
-                        <a href="#home" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Accueil</a>
-                        <a href="pages\calculateur.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Calculateur</a>
-                        <a href="pages\cours.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Cours</a>
-                        <a href="pages\bot.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mes Bots</a>
-                        <a href="pages\journal.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
-
-                        <!-- Bouton de connexion -->
-                        <button id="loginButton" onclick="loginWithGitHub()">Se connecter</button>
-
-                        <!-- Bulle pour afficher la première lettre du prénom -->
-                        <div class="user-bubble" id="userBubble" style="display:none;">
-                            <!-- La lettre sera injectée ici -->
-                        </div>
-
-                        <!-- Message "Connecté" -->
-                        <div class="user-status" id="userStatus" style="display:none;">
-                            Connecté
-                        </div>
-
-                        <!-- Bouton de déconnexion -->
-                        <button onclick="logout()" id="logoutButton" style="display:none; position: fixed; top: 100px; right: 20px;">Se déconnecter</button>
-                    </div>
-                </div>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <span class="text-xl font-bold text-white">Astral<span class="text-primary"> Trading</span></span>
             </div>
+          </div>
+          <!-- Desktop Menu -->
+          <div class="hidden md:block">
+            <div class="ml-10 flex items-center space-x-8">
+              <a href="#home" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Accueil</a>
+              <a href="pages/calculateur.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Calculateur</a>
+              <a href="pages/cours.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Cours</a>
+              <a href="pages/bot.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mes Bots</a>
+              <a href="pages/journal.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
+  
+              <!-- Bouton de connexion -->
+              <button id="loginButton" class="text-white border px-3 py-1 rounded">Se connecter</button>
+  
+              <!-- Bulle pour afficher la première lettre -->
+              <div class="user-bubble" id="userBubble" style="display:none; background: white; color: black; font-weight: bold; padding: 8px 12px; border-radius: 50%;"></div>
+  
+              <!-- Message "Connecté" -->
+              <div class="user-status text-green-400 text-sm font-semibold" id="userStatus" style="display:none;">Connecté</div>
+  
+              <!-- Bouton de déconnexion -->
+              <button onclick="logout()" id="logoutButton" style="display:none;" class="text-red-400 text-sm ml-4">Se déconnecter</button>
+            </div>
+          </div>
         </div>
+      </div>
     </nav>
-
-    <!-- Script pour Netlify Identity -->
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-
+  
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  
+    <!-- Script de connexion -->
     <script>
-        // Initialisation de Netlify Identity
-        netlifyIdentity.on('init', user => {
-            if (user) {
-                console.log("Utilisateur connecté :", user);
-                displayUserBubble(user);
-                document.getElementById('loginButton').style.display = 'none'; // Cacher le bouton de connexion
-                document.getElementById('logoutButton').style.display = 'block'; // Afficher le bouton de déconnexion
-            } else {
-                console.log("Utilisateur non connecté");
-                document.getElementById('userBubble').style.display = 'none'; // Cacher la bulle
-                document.getElementById('loginButton').style.display = 'block'; // Afficher le bouton de connexion
-                document.getElementById('logoutButton').style.display = 'none'; // Cacher le bouton de déconnexion
-            }
-        });
-
-        // Fonction pour ouvrir la fenêtre de connexion
-        function loginWithGitHub() {
-            netlifyIdentity.open('login');
+      const firebaseConfig = {
+        apiKey: "AIzaSyBOks3pghhiGNRtTSDSPiIzGs1JgfUZz5M",
+        authDomain: "astral-trading.firebaseapp.com",
+        projectId: "astral-trading",
+        storageBucket: "astral-trading.firebasestorage.app",
+        messagingSenderId: "269125744623",
+        appId: "1:269125744623:web:8060af03ecc845a62a681a"
+      };
+  
+      // Initialisation Firebase
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+  
+      const loginBtn = document.getElementById("loginButton");
+      const logoutBtn = document.getElementById("logoutButton");
+      const userBubble = document.getElementById("userBubble");
+      const userStatus = document.getElementById("userStatus");
+  
+      loginBtn.onclick = () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider);
+      };
+  
+      logoutBtn.onclick = () => auth.signOut();
+  
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          const name = user.displayName || "Utilisateur";
+          userBubble.textContent = name.charAt(0).toUpperCase();
+          userBubble.style.display = "inline-flex";
+          userStatus.style.display = "block";
+          userStatus.textContent = `Connecté en tant que ${name}`;
+          loginBtn.style.display = "none";
+          logoutBtn.style.display = "block";
+        } else {
+          userBubble.style.display = "none";
+          userStatus.style.display = "none";
+          loginBtn.style.display = "block";
+          logoutBtn.style.display = "none";
         }
-
-        // Fonction pour gérer le succès de la connexion
-        netlifyIdentity.on('login', function(user) {
-            console.log("Utilisateur connecté après login:", user);
-            displayUserBubble(user); // Afficher la bulle avec la première lettre du prénom
-            document.getElementById('loginButton').style.display = 'none'; // Cacher le bouton de connexion
-            document.getElementById('logoutButton').style.display = 'block'; // Afficher le bouton de déconnexion
-        });
-
-        // Afficher la bulle avec la première lettre du prénom
-        function displayUserBubble(user) {
-            const firstName = user.user_metadata ? user.user_metadata.full_name : "Utilisateur";
-            const firstLetter = firstName.charAt(0).toUpperCase();
-            const userBubble = document.getElementById('userBubble');
-            const userStatus = document.getElementById('userStatus');
-            
-            userBubble.textContent = firstLetter;
-            userBubble.style.display = 'block'; // Afficher la bulle
-            userStatus.style.display = 'block'; // Afficher le message "Connecté"
-            userStatus.textContent = `Connecté en tant que ${firstName}`;
-        }
-
-        // Gérer la déconnexion
-        function logout() {
-            netlifyIdentity.logout();
-            document.getElementById('userBubble').style.display = 'none'; // Cacher la bulle
-            document.getElementById('userStatus').style.display = 'none'; // Cacher le message "Connecté"
-            document.getElementById('loginButton').style.display = 'block'; // Afficher le bouton de connexion
-            document.getElementById('logoutButton').style.display = 'none'; // Cacher le bouton de déconnexion
-        }
+      });
     </script>
 
     <!-- Hero Section -->

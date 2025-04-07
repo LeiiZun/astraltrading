@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal de Trading - Astral Trading</title>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            color: #00bcd4;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .balance-box {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        input {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: #fff;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        button {
+            background-color: #00bcd4;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0097a7;
+        }
+
+        .logout-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .login-status {
+            color: #fff;
+            font-size: 14px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Journal de Trading</h1>
+
+        <div id="loginStatus" class="login-status" style="display: none;">Connecté en tant que : <span id="userName"></span></div>
+        <button id="logoutButton" style="display: none;" class="logout-btn">Se déconnecter</button>
+
+        <!-- Affichage du solde -->
+        <div class="balance-box">
+            <h2>Solde actuel</h2>
+            <p id="balanceAmount">0</p>
+            <input type="number" id="amountChange" placeholder="Montant à ajouter ou soustraire" required>
+            <button id="updateBalanceButton">Mettre à jour le solde</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOks3pghhiGNRtTSDSPiIzGs1JgfUZz5M",
+            authDomain: "astral-trading.firebaseapp.com",
+            projectId: "astral-trading",
+            storageBucket: "astral-trading.appspot.com",
+            messagingSenderId: "269125744623",
+            appId: "1:269125744623:web:8060af03ecc845a62a681a"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const balanceAmount = document.getElementById("balanceAmount");
+        const amountChange = document.getElementById("amountChange");
+        const updateBalanceButton = document.getElementById("updateBalanceButton");
+        const logoutButton = document.getElementById("logoutButton");
+        const loginStatus = document.getElementById("loginStatus");
+        const userName = document.getElementById("userName");
+
+        // Fonction pour charger et afficher le solde de l'utilisateur
+        const loadBalance = (uid) => {
+            const balanceRef = db.collection("journals").doc(uid);
+            balanceRef.get().then(doc => {
+                if (doc.exists) {
+                    balanceAmount.textContent = doc.data().balance.toFixed(2);
+                } else {
+                    // Si aucune donnée existante, initialiser à 0
+                    balanceAmount.textContent = "0";
+                }
+            });
+        };
+
+        // Fonction pour mettre à jour le solde de l'utilisateur
+        updateBalanceButton.onclick = () => {
+            const user = auth.currentUser;
+            if (user) {
+                const newAmount = parseFloat(amountChange.value);
+
+                // Vérification si le montant est un nombre valide
+                if (isNaN(newAmount) || newAmount === 0) {
+                    alert("Veuillez entrer un montant valide.");
+                    return;
+                }
+
+                const balanceRef = db.collection("journals").doc(user.uid);
+
+                balanceRef.get().then(doc => {
+                    let currentBalance = doc.exists ? doc.data().balance : 0;
+                    const updatedBalance = currentBalance + newAmount;
+
+                    // Mettre à jour le solde dans Firestore
+                    balanceRef.set({
+                        balance: updatedBalance
+                    }, { merge: true });
+
+                    // Mettre à jour l'affichage local
+                    balanceAmount.textContent = updatedBalance.toFixed(2);
+                });
+            }
+        };
+
+        // Fonction pour gérer la connexion de l'utilisateur
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                loginStatus.style.display = 'block';
+                userName.textContent = user.displayName || user.email;
+                logoutButton.style.display = 'block';
+                loadBalance(user.uid); // Charger le solde existant
+            } else {
+                loginStatus.style.display = 'none';
+                logoutButton.style.display = 'none';
+            }
+        });
+
+        // Fonction pour déconnecter l'utilisateur
+        logoutButton.onclick = () => {
+            auth.signOut();
+            window.location.reload();
+        };
+
+        // Connexion avec Google (authentification Firebase)
+        const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithPopup(googleAuthProvider).then(result => {
+            // Connexion réussie
+            const user = result.user;
+            console.log("Utilisateur connecté : " + user.displayName);
+        }).catch(error => {
+            console.error("Erreur de connexion : ", error);
+        });
+    </script>
+</body>
+</html>

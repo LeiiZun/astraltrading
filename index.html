@@ -4,20 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AstralTrading</title>
-    <!-- Balises de base -->
-    <title>Astral Trading - Deviens maître de ton trading</title>
     <meta name="description" content="Gère tes bots, suis ton journal de trading et progresse avec Astral Trading.">
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://astraltrading.netlify.app/">
-    <meta property="og:title" content="Astral Trading - Deviens maître de ton trading">
-    <meta property="og:description" content="Gère tes bots, suis ton journal de trading et progresse avec Astral Trading.">
-    <meta property="og:image" content="https://astraltrading.netlify.app/logo.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -260,11 +247,23 @@
         display: block;
         }
     </style>
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://astraltrading.netlify.app/">
+    <meta property="og:title" content="Astral Trading - Deviens maître de ton trading">
+    <meta property="og:description" content="Gère tes bots, suis ton journal de trading et progresse avec Astral Trading.">
+    <meta property="og:image" content="https://astraltrading.netlify.app/logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
 
-    <!-- Firebase SDK v9 Compat (auth + firestore + UI) -->
+    <!-- Favicon -->
+    <link rel="icon" href="https://astraltrading.netlify.app/favicon.ico" type="image/x-icon">
+
+    <!-- Firebase SDK v9 Compat -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <!-- FirebaseUI CSS + JS -->
     <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.css" />
@@ -288,22 +287,18 @@
 
         const uiConfig = {
             signInOptions: [
-                firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-                firebase.auth.AppleAuthProvider.PROVIDER_ID,
-                firebase.auth.EmailAuthProvider.PROVIDER_ID
+                firebase.auth.GoogleAuthProvider.PROVIDER_ID
             ],
             signInSuccessUrl: "/", // Redirige vers la home après connexion
         };
 
-        // Fonction qui ouvre l'UI Firebase au clic
+        // Fonction pour démarrer la connexion
         function login() {
-            console.log("Afficher le conteneur d'authentification");  // Debugger pour voir si la fonction est appelée
             document.getElementById("firebaseui-auth-container").style.display = "block"; // Affiche le conteneur d'auth
             ui.start("#firebaseui-auth-container", uiConfig); // Lance Firebase UI
         }
 
         document.getElementById("loginButton").addEventListener("click", () => {
-            console.log("Bouton de connexion cliqué");  // Debugger pour vérifier si le clic est bien capturé
             login(); // Appelle la fonction login
         });
 
@@ -350,8 +345,11 @@
             <a href="pages/bot.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mes Bots</a>
             <a href="pages/journal.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
 
-            <!-- Bouton de connexion -->
-            <button id="loginButton" class="text-white bg-primary px-3 py-1 rounded hover:bg-blue-600">Se connecter</button>
+            <!-- Bouton de connexion avec icône Google -->
+            <button id="loginButton" class="flex items-center space-x-2 text-white bg-primary px-3 py-1 rounded hover:bg-blue-600">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" alt="Google" class="w-5 h-5">
+                <span>Se connecter avec Google</span>
+            </button>
 
             <!-- Bulle utilisateur -->
             <div id="userBubble" class="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center font-bold" style="display:none;"></div>
@@ -369,7 +367,6 @@
 
   <!-- Conteneur FirebaseUI (doit être caché par défaut) -->
   <div id="firebaseui-auth-container" class="p-4" style="display:none;"></div>
-
     <!-- Hero Section -->
     <section id="home" class="relative overflow-hidden py-20 md:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

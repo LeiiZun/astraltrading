@@ -260,109 +260,110 @@
         display: block;
         }
     </style>
-        <!-- Firebase SDK v9 Compat (auth + firestore + UI) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- Firebase SDK v9 Compat (auth + firestore + UI) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-    <!-- FirebaseUI CSS + JS -->
-    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.css" />
-    <script src="https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.js"></script>
+<!-- FirebaseUI CSS + JS -->
+<link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.css" />
+<script src="https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.js"></script>
+
+<script>
+  // Configuration Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyBOks3pghhiGNRtTSDSPiIzGs1JgfUZz5M",
+    authDomain: "astral-trading.firebaseapp.com",
+    projectId: "astral-trading",
+    storageBucket: "astral-trading.appspot.com",
+    messagingSenderId: "269125744623",
+    appId: "1:269125744623:web:8060af03ecc845a62a681a"
+  };
+
+  // Initialisation Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  const ui = new firebaseui.auth.AuthUI(firebase.auth());
+
+  const uiConfig = {
+    signInOptions: [
+      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      firebase.auth.AppleAuthProvider.PROVIDER_ID,
+      firebase.auth.EmailAuthProvider.PROVIDER_ID
+    ],
+    signInSuccessUrl: "/", // Redirige vers la home après connexion
+  };
+
+  // Fonction qui ouvre l'UI Firebase au clic
+  function login() {
+    document.getElementById("firebaseui-auth-container").style.display = "block"; // Affiche le conteneur d'auth
+    ui.start("#firebaseui-auth-container", uiConfig); // Lance Firebase UI
+  }
+
+  document.getElementById("loginButton").addEventListener("click", login); // Connecte le bouton de login avec la fonction login
+
+  document.getElementById("logoutButton").addEventListener("click", () => {
+    firebase.auth().signOut().then(() => location.reload()); // Déconnexion avec reload de la page
+  });
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+      document.getElementById("loginButton").style.display = "none"; // Cache le bouton de login
+      document.getElementById("logoutButton").style.display = "block"; // Affiche le bouton de logout
+      document.getElementById("userBubble").style.display = "flex"; // Affiche la bulle utilisateur
+      document.getElementById("userStatus").style.display = "block"; // Affiche le message "connecté"
+
+      const firstLetter = user.displayName ? user.displayName.charAt(0).toUpperCase() : "?";
+      document.getElementById("userBubble").textContent = firstLetter; // Affiche la première lettre dans la bulle
+      document.getElementById("userStatus").textContent = `Connecté en tant que ${user.displayName || "Utilisateur"}`; // Affiche le statut
+    } else {
+      document.getElementById("loginButton").style.display = "block"; // Affiche le bouton de login si non connecté
+      document.getElementById("logoutButton").style.display = "none"; // Cache le bouton de logout
+      document.getElementById("userBubble").style.display = "none"; // Cache la bulle utilisateur
+      document.getElementById("userStatus").style.display = "none"; // Cache le message "connecté"
+      document.getElementById("firebaseui-auth-container").style.display = "none"; // Cache le conteneur FirebaseUI
+    }
+  });
+</script>
 </head>
+
 <body class="gradient-bg">
-    <!-- Navigation -->
-    <nav class="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16 items-center">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <span class="text-xl font-bold text-white">Astral<span class="text-primary"> Trading</span></span>
-            </div>
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <span class="text-xl font-bold text-white">Astral<span class="text-primary"> Trading</span></span>
           </div>
-          <!-- Desktop Menu -->
-          <div class="hidden md:block">
-            <div class="ml-10 flex items-center space-x-8">
-              <a href="#home" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Accueil</a>
-              <a href="pages/calculateur.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Calculateur</a>
-              <a href="pages/cours.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Cours</a>
-              <a href="pages/bot.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mes Bots</a>
-              <a href="pages/journal.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
-  
-              <!-- Bouton de connexion -->
-              <button id="loginButton" class="text-white bg-primary px-3 py-1 rounded hover:bg-blue-600">Se connecter</button>
-  
-              <!-- Bulle utilisateur -->
-              <div id="userBubble" class="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center font-bold" style="display:none;"></div>
-  
-              <!-- Texte connecté -->
-              <div id="userStatus" class="text-white text-sm" style="display:none;"></div>
-  
-              <!-- Déconnexion -->
-              <button id="logoutButton" style="display:none;" class="ml-4 text-white px-3 py-1 bg-red-600 rounded hover:bg-red-700">Se déconnecter</button>
-            </div>
+        </div>
+        <div class="hidden md:block">
+          <div class="ml-10 flex items-center space-x-8">
+            <a href="#home" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Accueil</a>
+            <a href="pages/calculateur.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Calculateur</a>
+            <a href="pages/cours.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Cours</a>
+            <a href="pages/bot.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mes Bots</a>
+            <a href="pages/journal.html" class="nav-link text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Mon Journal</a>
+
+            <!-- Bouton de connexion -->
+            <button id="loginButton" class="text-white bg-primary px-3 py-1 rounded hover:bg-blue-600">Se connecter</button>
+
+            <!-- Bulle utilisateur -->
+            <div id="userBubble" class="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center font-bold" style="display:none;"></div>
+
+            <!-- Texte connecté -->
+            <div id="userStatus" class="text-white text-sm" style="display:none;"></div>
+
+            <!-- Déconnexion -->
+            <button id="logoutButton" style="display:none;" class="ml-4 text-white px-3 py-1 bg-red-600 rounded hover:bg-red-700">Se déconnecter</button>
           </div>
         </div>
       </div>
-    </nav>
-  
-    <!-- Conteneur FirebaseUI -->
-    <div id="firebaseui-auth-container" class="p-4" style="display:none;"></div>
-  
-    <!-- FirebaseUI Script (doit être après avoir chargé Firebase dans <head>) -->
-    <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyBOks3pghhiGNRtTSDSPiIzGs1JgfUZz5M",
-        authDomain: "astral-trading.firebaseapp.com",
-        projectId: "astral-trading",
-        storageBucket: "astral-trading.appspot.com",
-        messagingSenderId: "269125744623",
-        appId: "1:269125744623:web:8060af03ecc845a62a681a"
-      };
-  
-      // Initialisation Firebase
-      firebase.initializeApp(firebaseConfig);
-  
-      const ui = new firebaseui.auth.AuthUI(firebase.auth());
-  
-      const uiConfig = {
-        signInOptions: [
-          firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-          firebase.auth.AppleAuthProvider.PROVIDER_ID,
-          firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        ],
-        signInSuccessUrl: "/", // Redirige vers la home après connexion
-      };
-  
-      // Lancer FirebaseUI au clic
-      function login() {
-        document.getElementById("firebaseui-auth-container").style.display = "block";
-        ui.start("#firebaseui-auth-container", uiConfig);
-      }
-  
-      document.getElementById("loginButton").addEventListener("click", login);
-      document.getElementById("logoutButton").addEventListener("click", () => {
-        firebase.auth().signOut().then(() => location.reload());
-      });
-  
-      firebase.auth().onAuthStateChanged(user => {
-        if (user) {
-          document.getElementById("loginButton").style.display = "none";
-          document.getElementById("logoutButton").style.display = "block";
-          document.getElementById("userBubble").style.display = "flex";
-          document.getElementById("userStatus").style.display = "block";
-  
-          const firstLetter = user.displayName ? user.displayName.charAt(0).toUpperCase() : "?";
-          document.getElementById("userBubble").textContent = firstLetter;
-          document.getElementById("userStatus").textContent = `Connecté en tant que ${user.displayName || "Utilisateur"}`;
-        } else {
-          document.getElementById("loginButton").style.display = "block";
-          document.getElementById("logoutButton").style.display = "none";
-          document.getElementById("userBubble").style.display = "none";
-          document.getElementById("userStatus").style.display = "none";
-          document.getElementById("firebaseui-auth-container").style.display = "none";
-        }
-      });
-    </script>
+    </div>
+  </nav>
+
+  <!-- Conteneur FirebaseUI (doit être caché par défaut) -->
+  <div id="firebaseui-auth-container" class="p-4" style="display:none;"></div>
 
     <!-- Hero Section -->
     <section id="home" class="relative overflow-hidden py-20 md:py-32">

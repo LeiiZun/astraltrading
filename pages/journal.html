@@ -15,31 +15,73 @@
 
     <style>
         body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f4f4f9;
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #f4f4f9;
+            margin: 0;
+            padding: 0;
         }
 
         h1 {
+            color: #00bcd4;
             text-align: center;
+            margin-top: 40px;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
         }
 
         .trade-form {
-            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        input {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #00bcd4;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0097a7;
         }
 
         .stat-box {
-            background-color: #fff;
-            border: 1px solid #ddd;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             padding: 20px;
-            margin-bottom: 20px;
+            margin-top: 20px;
         }
 
         .stat-box h2 {
+            color: #00bcd4;
             margin-top: 0;
         }
 
         .chart-container {
+            margin-top: 40px;
             position: relative;
             height: 400px;
         }
@@ -48,23 +90,60 @@
             width: 100%;
             margin-top: 20px;
             border-collapse: collapse;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .trade-table th, .trade-table td {
             padding: 10px;
-            border: 1px solid #ddd;
             text-align: center;
+            border: 1px solid #333;
+        }
+
+        .trade-table th {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .trade-table tr:nth-child(even) {
+            background-color: #222;
+        }
+
+        .trade-table tr:nth-child(odd) {
+            background-color: #1e1e1e;
+        }
+
+        .logout-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .login-status {
+            color: #fff;
+            font-size: 14px;
+            text-align: right;
         }
     </style>
 </head>
 <body>
-    <div>
+    <div class="container">
         <h1>Journal de Trading</h1>
-        <div id="loginStatus" style="display: none;">Connecté en tant que : <span id="userName"></span></div>
-        <button id="logoutButton" style="display: none;">Se déconnecter</button>
+
+        <div id="loginStatus" class="login-status" style="display: none;">Connecté en tant que : <span id="userName"></span></div>
+        <button id="logoutButton" style="display: none;" class="logout-btn">Se déconnecter</button>
 
         <!-- Formulaire pour ajouter un trade -->
         <div class="trade-form">
+            <input type="text" id="pair" placeholder="Paire de Trading (ex: EUR/USD)" required>
             <input type="number" id="entryPrice" placeholder="Prix d'entrée" step="0.01" required>
             <input type="number" id="exitPrice" placeholder="Prix de sortie" step="0.01" required>
             <input type="number" id="tradeAmount" placeholder="Montant" required>
@@ -88,6 +167,7 @@
             <thead>
                 <tr>
                     <th>Date</th>
+                    <th>Paire</th>
                     <th>Prix d'entrée</th>
                     <th>Prix de sortie</th>
                     <th>Montant</th>
@@ -112,6 +192,7 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        const pair = document.getElementById("pair");
         const entryPrice = document.getElementById("entryPrice");
         const exitPrice = document.getElementById("exitPrice");
         const tradeAmount = document.getElementById("tradeAmount");
@@ -124,7 +205,6 @@
         const loginStatus = document.getElementById("loginStatus");
         const userName = document.getElementById("userName");
 
-        let trades = [];
         let winCount = 0;
         let lossCount = 0;
         let totalPL = 0;
@@ -137,10 +217,11 @@
             totalProfitLoss.textContent = totalPL.toFixed(2);
         };
 
-        // Fonction pour ajouter un trade
+        // Fonction pour ajouter un trade et l'enregistrer dans Firestore
         addTradeButton.onclick = () => {
             const user = auth.currentUser;
             if (user) {
+                const pairValue = pair.value;
                 const entry = parseFloat(entryPrice.value);
                 const exit = parseFloat(exitPrice.value);
                 const amount = parseFloat(tradeAmount.value);
@@ -150,6 +231,7 @@
 
                 // Ajouter le trade à la collection Firestore
                 db.collection("journals").doc(user.uid).collection("trades").add({
+                    pair: pairValue,
                     entryPrice: entry,
                     exitPrice: exit,
                     tradeAmount: amount,
@@ -160,10 +242,11 @@
                 // Mettre à jour le tableau
                 const row = tradeTable.insertRow();
                 row.insertCell(0).textContent = new Date().toLocaleString();
-                row.insertCell(1).textContent = entry.toFixed(2);
-                row.insertCell(2).textContent = exit.toFixed(2);
-                row.insertCell(3).textContent = amount;
-                row.insertCell(4).textContent = profitLoss.toFixed(2);
+                row.insertCell(1).textContent = pairValue;
+                row.insertCell(2).textContent = entry.toFixed(2);
+                row.insertCell(3).textContent = exit.toFixed(2);
+                row.insertCell(4).textContent = amount;
+                row.insertCell(5).textContent = profitLoss.toFixed(2);
 
                 // Mettre à jour les statistiques
                 if (isWinningTrade) winCount++;
@@ -171,7 +254,7 @@
                 totalPL += profitLoss;
 
                 calculateStats();
-                entryPrice.value = exitPrice.value = tradeAmount.value = ""; // Réinitialiser le formulaire
+                pair.value = entryPrice.value = exitPrice.value = tradeAmount.value = ""; // Réinitialiser le formulaire
             }
         };
 
@@ -186,60 +269,90 @@
                     // Mettre à jour le tableau avec les trades de Firestore
                     const row = tradeTable.insertRow();
                     row.insertCell(0).textContent = new Date(trade.date.seconds * 1000).toLocaleString();
-                    row.insertCell(1).textContent = trade.entryPrice.toFixed(2);
-                    row.insertCell(2).textContent = trade.exitPrice.toFixed(2);
-                    row.insertCell(3).textContent = trade.tradeAmount;
-                    row.insertCell(4).textContent = profitLoss.toFixed(2);
+                    row.insertCell(1).textContent = trade.pair;
+                    row.insertCell(2).textContent = trade.entryPrice.toFixed(2);
+                    row.insertCell(3).textContent = trade.exitPrice.toFixed(2);
+                    row.insertCell(4).textContent = trade.tradeAmount;
+                    row.insertCell(5).textContent = profitLoss.toFixed(2);
 
                     // Mettre à jour les statistiques
                     if (profitLoss > 0) winCount++;
                     else lossCount++;
                     totalPL += profitLoss;
                 });
+
                 calculateStats();
-                updateChart(); // Mettre à jour le graphique
             });
         };
 
-        // Fonction pour afficher le graphique des performances
-        const updateChart = () => {
-            const labels = trades.map((_, index) => index + 1);
-            const data = trades.map(trade => trade.profitLoss);
-
-            new Chart(performanceChart, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Performance des Trades',
-                        data: data,
-                        fill: false,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        tension: 0.1
-                    }]
-                }
-            });
-        };
-
-        // Vérification de l'état de l'utilisateur
+        // Fonction pour gérer la connexion de l'utilisateur
         auth.onAuthStateChanged(user => {
             if (user) {
-                userName.textContent = user.displayName || "Utilisateur";
-                loginStatus.style.display = "block";
-                logoutButton.style.display = "block";
-                loadTrades(user.uid); // Charger les trades de l'utilisateur
+                loginStatus.style.display = 'block';
+                userName.textContent = user.displayName || user.email;
+                logoutButton.style.display = 'block';
+                loadTrades(user.uid); // Charger les trades existants
             } else {
-                loginStatus.style.display = "none";
-                logoutButton.style.display = "none";
-                tradeTable.innerHTML = ""; // Réinitialiser le tableau
+                loginStatus.style.display = 'none';
+                logoutButton.style.display = 'none';
             }
         });
 
-        // Déconnexion
+        // Fonction pour déconnecter l'utilisateur
         logoutButton.onclick = () => {
-            auth.signOut().then(() => {
-                window.location.href = "index.html"; // Rediriger vers la page d'accueil après déconnexion
-            });
+            auth.signOut();
+            window.location.reload();
+        };
+
+        // Connexion avec Google (authentification Firebase)
+        const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithPopup(googleAuthProvider).then(result => {
+            // Connexion réussie
+            const user = result.user;
+            console.log("Utilisateur connecté : " + user.displayName);
+        }).catch(error => {
+            console.error("Erreur de connexion : ", error);
+        });
+
+        // Initialiser le graphique des performances
+        const ctx = performanceChart.getContext('2d');
+        const performanceData = {
+            labels: [], // Labels pour les dates
+            datasets: [{
+                label: 'Profit / Perte',
+                data: [],
+                borderColor: '#00bcd4',
+                backgroundColor: 'rgba(0, 188, 212, 0.2)',
+                borderWidth: 1
+            }]
+        };
+
+        const performanceChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: performanceData,
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Fonction pour mettre à jour le graphique en temps réel
+        const updateChart = () => {
+            performanceData.labels.push(new Date().toLocaleString());
+            performanceData.datasets[0].data.push(totalPL);
+            performanceChartInstance.update();
+        };
+
+        // Mettre à jour le graphique lorsque un trade est ajouté
+        addTradeButton.onclick = () => {
+            updateChart();
         };
     </script>
 </body>
